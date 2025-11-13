@@ -43,7 +43,7 @@ public class ActividadPrincipal extends AppCompatActivity {
 
     // (Necesitarás crear un Adaptador para el RecyclerView)
     private AdaptadorArchivos adaptadorArchivos;
-    private List<Archivo> listaDeArchivos;
+    private List<ModeloArchivo> listaDeArchivos;
 
 
     @Override
@@ -75,7 +75,7 @@ public class ActividadPrincipal extends AppCompatActivity {
         // 1. Inicializar listaDeArchivos = new ArrayList<>();
         listaDeArchivos = new ArrayList<>();
         // 2. Inicializar adaptadorArchivos = new AdaptadorArchivos(this, listaDeArchivos);
-        daptadorArchivos = new AdaptadorArchivos(this, listaDeArchivos);
+        adaptadorArchivos = new AdaptadorArchivos(this, listaDeArchivos);
         // 3. listaFeedArchivos.setLayoutManager(new LinearLayoutManager(this));
         listaFeedArchivos.setLayoutManager(new LinearLayoutManager(this));
         // 4. listaFeedArchivos.setAdapter(adaptadorArchivos);
@@ -112,9 +112,12 @@ public class ActividadPrincipal extends AppCompatActivity {
                     }
 
                     listaDeArchivos.clear();
-                    for (DocumentSnapshot doc : snapshots) {
-                        Archivo archivo = doc.toObject(Archivo.class); // Necesitas crear la clase Modelo "Archivo.java"
-                        listaDeArchivos.add(archivo);
+                    for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                        ModeloArchivo archivo = doc.toObject(ModeloArchivo.class);
+                        if (archivo != null) {
+                            archivo.setDocumentId(doc.getId()); // Guardar el ID del documento
+                            listaDeArchivos.add(archivo);
+                        }
                     }
                     adaptadorArchivos.notifyDataSetChanged();
                 });
@@ -148,7 +151,7 @@ public class ActividadPrincipal extends AppCompatActivity {
             return true;
         } else if (id == R.id.menu_grupos) {
             // Ir a la actividad de gestión de grupos
-            Intent intent = new Intent(ActividadPrincipal.this, ActividadGrupos.class);
+            Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
             startActivity(intent);
             Toast.makeText(this, "Implementar Grupos", Toast.LENGTH_SHORT).show();
             return true;
