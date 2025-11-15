@@ -24,6 +24,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +125,7 @@ public class ActividadBusqueda extends AppCompatActivity {
                             } else {
                                 // Llenar la lista con los resultados
                                 for (ModeloUsuario usuario : task.getResult().toObjects(ModeloUsuario.class)) {
+                                    //usuario.setUid(doc.getId());
                                     // No agregarnos a nosotros mismos
                                     if (!usuario.getCorreo().equals(usuarioActual.getEmail())) {
                                         listaUsuarios.add(usuario);

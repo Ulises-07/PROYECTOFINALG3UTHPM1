@@ -88,11 +88,11 @@ public class ActividadInicioSesion extends AppCompatActivity {
         }
 
         // Validación de correo UTH (ejemplo simple)
-        if (!correo.endsWith("@uth.hn")) {
-            campoCorreo.setError("Debe ser un correo institucional (@uth.hn).");
-            campoCorreo.requestFocus();
-            return;
-        }
+//        if (!correo.endsWith("@uth.hn")) {
+//            campoCorreo.setError("Debe ser un correo institucional (@uth.hn).");
+//            campoCorreo.requestFocus();
+//            return;
+//        }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
             campoCorreo.setError("Correo no válido.");
@@ -145,7 +145,7 @@ public class ActividadInicioSesion extends AppCompatActivity {
 
                         } else {
                             // Error en inicio de sesión
-                            Toast.makeText(ActividadInicioSesion.this, "Error al iniciar sesión: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(ActividadInicioSesion.this, "Error al iniciar sesión.", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -169,7 +169,7 @@ public class ActividadInicioSesion extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Toast.makeText(ActividadInicioSesion.this, "Correo de recuperación enviado.", Toast.LENGTH_LONG).show();
                         } else {
-                            Toast.makeText(ActividadInicioSesion.this, "Error al enviar correo: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(ActividadInicioSesion.this, "Error al enviar correo para recuperacion de contraseña.", Toast.LENGTH_LONG).show();
                         }
                     }
                 });
