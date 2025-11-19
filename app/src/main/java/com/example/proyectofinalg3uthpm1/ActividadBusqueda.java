@@ -112,33 +112,41 @@ public class ActividadBusqueda extends AppCompatActivity {
 
         // REQUERIMIENTO: Motor de búsqueda para encontrar estudiantes
         // Búsqueda por rango de correo.
+        // En tu método buscarUsuarios()
         db.collection("Usuarios")
                 .whereEqualTo("correo", consultaCorreo.toLowerCase())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        progressBar.setVisibility(View.GONE);
-                        if (task.isSuccessful()) {
-                            if (task.getResult().isEmpty()) {
-                                Toast.makeText(ActividadBusqueda.this, "No se encontraron usuarios.", Toast.LENGTH_SHORT).show();
-                            } else {
-                                // Llenar la lista con los resultados
-                                for (ModeloUsuario usuario : task.getResult().toObjects(ModeloUsuario.class)) {
-                                    //usuario.setUid(doc.getId());
-                                    // No agregarnos a nosotros mismos
+                .addOnCompleteListener(task -> { // Usando una expresión lambda para más claridad
+                    progressBar.setVisibility(View.GONE);
+                    if (task.isSuccessful()) {
+                        if (task.getResult().isEmpty()) {
+                            Toast.makeText(ActividadBusqueda.this, "No se encontraron usuarios.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // --- APLICA LA SOLUCIÓN AQUÍ ---
+                            // 1. Limpia la lista antes de añadir nuevos resultados
+                            listaUsuarios.clear();
+                            // 2. Itera sobre los documentos, no sobre los objetos ya convertidos
+                            for (DocumentSnapshot document : task.getResult().getDocuments()) {
+                                // 3. Convierte el documento a un objeto ModeloUsuario
+                                ModeloUsuario usuario = document.toObject(ModeloUsuario.class);
+                                if (usuario != null) {
+                                    // 4. Asigna el ID del documento al objeto
+                                    usuario.setUid(document.getId());
+
+                                    // 5. Añade a la lista si no es el usuario actual
                                     if (!usuario.getCorreo().equals(usuarioActual.getEmail())) {
                                         listaUsuarios.add(usuario);
                                     }
                                 }
-                                adaptadorUsuario.notifyDataSetChanged();
                             }
-                        } else {
-                            Log.w(TAG, "Error al buscar usuarios: ", task.getException());
-                            Toast.makeText(ActividadBusqueda.this, "Error al buscar.", Toast.LENGTH_SHORT).show();
+                            adaptadorUsuario.notifyDataSetChanged();
                         }
+                    } else {
+                        Log.w(TAG, "Error al buscar usuarios: ", task.getException());
+                        Toast.makeText(ActividadBusqueda.this, "Error al buscar.", Toast.LENGTH_SHORT).show();
                     }
                 });
+
     }
 
     private void agregarCompanero(ModeloUsuario usuario, Button boton) {
