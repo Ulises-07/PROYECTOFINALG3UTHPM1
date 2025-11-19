@@ -3,7 +3,8 @@ package com.example.proyectofinalg3uthpm1;
 import android.Manifest;
 import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;import android.os.Build;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -51,7 +52,7 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
     private String tipoArchivo;
     private String nombreArchivo;
 
-    // --- NUEVOS LANZADORES DE ACTIVIDADES (Forma moderna) ---
+    // --- LANZADORES DE ACTIVIDADES (Forma moderna y correcta) ---
     private ActivityResultLauncher<String[]> lanzadorPermisos;
     private ActivityResultLauncher<Intent> lanzadorSelectorArchivos;
 
@@ -80,7 +81,7 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
         textoInfoArchivo = findViewById(R.id.textoInfoArchivo);
         barraProgreso = findViewById(R.id.barraProgresoEnvio);
 
-        // Inicializar los lanzadores de resultados
+        // Inicializar los lanzadores de resultados de actividad
         inicializarLanzadores();
 
         // Configurar Clics
@@ -89,69 +90,75 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
     }
 
     private void inicializarLanzadores() {
-        // 1. Lanzador para solicitar permisos
+        // 1. Lanzador para la solicitud de permisos en tiempo de ejecución
         lanzadorPermisos = registerForActivityResult(new ActivityResultContracts.RequestMultiplePermissions(), resultado -> {
-            boolean concedido = false;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            boolean concedido;
+            // Comprueba el permiso correcto según la versión de Android
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
                 concedido = Boolean.TRUE.equals(resultado.get(Manifest.permission.READ_MEDIA_IMAGES)) ||
                         Boolean.TRUE.equals(resultado.get(Manifest.permission.READ_MEDIA_VIDEO));
-            } else {
+            } else { // Versiones anteriores
                 concedido = Boolean.TRUE.equals(resultado.get(Manifest.permission.READ_EXTERNAL_STORAGE));
             }
 
             if (concedido) {
-                Log.d(TAG, "Permisos de lectura concedidos.");
-                abrirSelectorDeArchivo(); // Si se conceden, abrimos el selector
+                Log.d(TAG, "Permiso de lectura concedido.");
+                abrirSelectorDeArchivo(); // Si se conceden los permisos, ahora sí abrimos el selector.
             } else {
-                Log.d(TAG, "Permisos de lectura denegados.");
-                Toast.makeText(this, "Permiso necesario para seleccionar archivos.", Toast.LENGTH_LONG).show();
+                Log.d(TAG, "Permiso de lectura denegado.");
+                Toast.makeText(this, "El permiso para acceder a archivos es necesario.", Toast.LENGTH_LONG).show();
             }
         });
 
-        // 2. Lanzador para el selector de archivos (reemplaza a onActivityResult)
+        // 2. Lanzador para el resultado del selector de archivos (reemplaza a onActivityResult)
         lanzadorSelectorArchivos = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), resultado -> {
             if (resultado.getResultCode() == RESULT_OK && resultado.getData() != null && resultado.getData().getData() != null) {
                 uriArchivoSeleccionado = resultado.getData().getData();
                 tipoArchivo = getContentResolver().getType(uriArchivoSeleccionado);
                 nombreArchivo = obtenerNombreArchivo(uriArchivoSeleccionado);
 
-                // Actualizar UI
-                botonEnviar.setEnabled(true);
-                if (tipoArchivo != null && tipoArchivo.startsWith("image/")) {
-                    // Es imagen, mostrar vista previa
-                    imagenVistaPrevia.setVisibility(View.VISIBLE);
-                    textoInfoArchivo.setVisibility(View.GONE);
-                    Glide.with(this).load(uriArchivoSeleccionado).into(imagenVistaPrevia);
-                } else {
-                    // No es imagen (PDF, Video, etc.), mostrar info
-                    imagenVistaPrevia.setVisibility(View.GONE);
-                    textoInfoArchivo.setVisibility(View.VISIBLE);
-                    textoInfoArchivo.setText("Archivo: " + nombreArchivo);
-                }
+                // Actualizar la interfaz de usuario con la información del archivo seleccionado
+                actualizarUIConArchivo();
             }
         });
     }
 
     private void solicitarPermisosYContinuar() {
         String[] permisos;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
-            // Para Android 13+, pedimos permisos más específicos.
+        // Elige qué permisos solicitar según la versión del SDK de Android
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permisos = new String[]{Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO};
-        } else { // Versiones anteriores
+        } else {
             permisos = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
         }
-        // Lanza la solicitud de permisos
+        // Lanza el diálogo para solicitar los permisos al usuario
         lanzadorPermisos.launch(permisos);
     }
 
     private void abrirSelectorDeArchivo() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("*/*");
-        // Permitir seleccionar imágenes, videos y PDFs
         String[] mimetypes = {"image/*", "video/*", "application/pdf"};
         intent.putExtra(Intent.EXTRA_MIME_TYPES, mimetypes);
-        // Usar el nuevo lanzador
+        // Usa el nuevo lanzador para abrir el selector de archivos
         lanzadorSelectorArchivos.launch(intent);
+    }
+
+    // Este método ya no es necesario porque usamos lanzadorSelectorArchivos
+    // @Override
+    // protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) { ... }
+
+    private void actualizarUIConArchivo() {
+        botonEnviar.setEnabled(true);
+        if (tipoArchivo != null && tipoArchivo.startsWith("image/")) {
+            imagenVistaPrevia.setVisibility(View.VISIBLE);
+            textoInfoArchivo.setVisibility(View.GONE);
+            Glide.with(this).load(uriArchivoSeleccionado).into(imagenVistaPrevia);
+        } else {
+            imagenVistaPrevia.setVisibility(View.GONE);
+            textoInfoArchivo.setVisibility(View.VISIBLE);
+            textoInfoArchivo.setText("Archivo: " + nombreArchivo);
+        }
     }
 
     // Helper para obtener el nombre del archivo desde la URI
@@ -165,6 +172,8 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
                         nombre = cursor.getString(index);
                     }
                 }
+            } catch (Exception e) {
+                Log.e(TAG, "Error al obtener el nombre del archivo", e);
             }
         }
         if (nombre == null) {
@@ -176,7 +185,6 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
                 }
             }
         }
-        // Si sigue siendo nulo, ponemos un nombre genérico
         return (nombre != null) ? nombre : "archivo_desconocido";
     }
 
@@ -186,7 +194,6 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
             return;
         }
 
-        // Comprobación de seguridad para el usuario actual
         if (usuarioActual == null) {
             Toast.makeText(this, "Error de sesión. Por favor, inicia sesión de nuevo.", Toast.LENGTH_LONG).show();
             return;
@@ -194,46 +201,39 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
 
         // Mostrar progreso
         barraProgreso.setVisibility(View.VISIBLE);
-        barraProgreso.setIndeterminate(true);
         botonEnviar.setEnabled(false);
         botonSeleccionar.setEnabled(false);
 
-        // 1. Subir archivo a Firebase Storage
         StorageReference refArchivo = storage.getReference()
                 .child("archivos_compartidos/" + UUID.randomUUID().toString() + "_" + nombreArchivo);
 
         refArchivo.putFile(uriArchivoSeleccionado)
                 .addOnSuccessListener(taskSnapshot -> {
-                    // 2. Obtener la URL de descarga
                     refArchivo.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String urlDescarga = uri.toString();
-                        // 3. Obtener el nombre del usuario actual
-                        obtenerNombreUsuarioYGuardarEnFirestore(urlDescarga);
+                        obtenerNombreUsuarioYGuardarEnFirestore(uri.toString());
                     });
                 })
                 .addOnFailureListener(e -> {
-                    // Error al subir
-                    restaurarUI("Error al subir archivo: " + e.getMessage());
+                    // Impresión de error detallada para depuración
+                    Log.e(TAG, "Error al subir a Firebase Storage", e);
+                    restaurarUI("Error al subir: " + e.getMessage());
                 });
     }
 
     private void obtenerNombreUsuarioYGuardarEnFirestore(String urlDescarga) {
-        // Obtenemos el nombre del perfil de Firestore
         db.collection("Usuarios").document(usuarioActual.getUid()).get()
                 .addOnSuccessListener(documentSnapshot -> {
-                    String nombreEmisor = usuarioActual.getEmail(); // Fallback por defecto
+                    String nombreEmisor = usuarioActual.getEmail(); // Fallback
                     if (documentSnapshot != null && documentSnapshot.exists()) {
-                        // Asegúrate de que el campo se llama "nombreCompleto" en tu Firestore
                         String nombreCompleto = documentSnapshot.getString("nombreCompleto");
-                        if (nombreCompleto != null && !nombreCompleto.isEmpty()) {
+                        if(nombreCompleto != null && !nombreCompleto.isEmpty()) {
                             nombreEmisor = nombreCompleto;
                         }
                     }
-                    // 4. Guardar metadata en Firestore
                     guardarMetadataEnFirestore(urlDescarga, nombreEmisor);
                 })
                 .addOnFailureListener(e -> {
-                    // Si falla, usamos el email como nombre y continuamos
+                    Log.w(TAG, "No se pudo obtener el nombre del perfil, usando email como fallback.", e);
                     guardarMetadataEnFirestore(urlDescarga, usuarioActual.getEmail());
                 });
     }
@@ -245,22 +245,21 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
         datosArchivo.put("urlArchivo", urlDescarga);
         datosArchivo.put("nombreArchivo", nombreArchivo);
         datosArchivo.put("tipoArchivo", tipoArchivo);
-        datosArchivo.put("idGrupoDestino", null); // TODO: Implementar selección de grupo
-        datosArchivo.put("idUsuarioDestino", null); // TODO: Implementar selección de compañero
+        datosArchivo.put("idGrupoDestino", null);
+        datosArchivo.put("idUsuarioDestino", null);
         datosArchivo.put("fechaEnvio", com.google.firebase.firestore.FieldValue.serverTimestamp());
 
         db.collection("Archivos").add(datosArchivo)
                 .addOnSuccessListener(documentReference -> {
-                    // Éxito final
                     Toast.makeText(this, "Archivo enviado.", Toast.LENGTH_SHORT).show();
-                    finish(); // Volver a ActividadPrincipal
+                    finish(); // Volver a la actividad anterior
                 })
                 .addOnFailureListener(e -> {
+                    Log.e(TAG, "Error al guardar metadata en Firestore", e);
                     restaurarUI("Error al guardar datos: " + e.getMessage());
                 });
     }
 
-    // Método de ayuda para restaurar la UI en caso de error
     private void restaurarUI(String mensajeError) {
         barraProgreso.setVisibility(View.GONE);
         botonEnviar.setEnabled(true);
