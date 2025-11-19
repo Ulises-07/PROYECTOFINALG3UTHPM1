@@ -15,7 +15,7 @@
             android:id="@+id/toolbarBusqueda"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
+            android:background="@android:color/holo_green_dark"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
         <!-- SearchView irá aquí, debajo del Toolbar -->

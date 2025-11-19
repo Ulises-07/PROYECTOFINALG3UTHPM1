@@ -123,22 +123,23 @@
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginTop="24dp"
+        android:backgroundTint="@android:color/holo_green_dark"
         android:text="Registrarse"
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/layoutConfirmarClave"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/layoutConfirmarClave" />
 
     <TextView
         android:id="@+id/textoIrAInicio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="¿Ya tienes cuenta? Inicia sesión"
-        android:textColor="@color/design_default_color_primary"
         android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@id/botonRegistrar"
+        android:text="¿Ya tienes cuenta? Inicia sesión"
+        android:textColor="@android:color/holo_green_dark"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/botonRegistrar" />
 
     <ProgressBar
         android:id="@+id/barraProgresoRegistro"

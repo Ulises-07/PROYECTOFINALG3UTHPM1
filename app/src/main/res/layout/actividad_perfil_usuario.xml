@@ -134,9 +134,10 @@
             android:id="@+id/botonElegirFecha"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Elegir"
+            android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
-            android:layout_gravity="center_vertical"/>
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:text="Elegir" />
     </LinearLayout>
 
 
@@ -145,11 +146,12 @@
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginTop="24dp"
+        android:backgroundTint="@android:color/holo_green_dark"
         android:text="Guardar Cambios"
         android:textSize="18sp"
-        app:layout_constraintTop_toBottomOf="@id/layoutFechaNacimiento"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/layoutFechaNacimiento" />
 
     <ProgressBar
         android:id="@+id/barraProgresoPerfil"
