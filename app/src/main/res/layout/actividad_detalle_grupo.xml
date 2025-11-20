@@ -15,9 +15,9 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarDetalleGrupo"
             android:layout_width="match_parent"
-            android:layout_marginTop="35dp"
             android:layout_height="?attr/actionBarSize"
-            android:background="@android:color/holo_green_dark"
+            android:layout_marginTop="35dp"
+            android:background="@android:color/holo_blue_dark"
             app:popupTheme="@style/Theme.AppCompat.Light" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -60,7 +60,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="16dp"
         android:contentDescription="Subir Archivo"
-        android:src="@android:drawable/ic_menu_upload"
+        android:src="@drawable/rounded_arrow_warm_up_24"
         app:backgroundTint="@android:color/holo_blue_dark" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
