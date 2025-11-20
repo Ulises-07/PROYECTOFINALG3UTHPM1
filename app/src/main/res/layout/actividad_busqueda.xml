@@ -14,6 +14,7 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbarBusqueda"
             android:layout_width="match_parent"
+            android:layout_marginTop="35dp"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/holo_green_dark"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
@@ -22,10 +23,13 @@
         <androidx.appcompat.widget.SearchView
             android:id="@+id/searchViewUsuarios"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/white"
+            android:layout_height="64dp"
+            android:layout_margin="0dp"
+            android:background="@drawable/abc_popup_background_mtrl_mult"
+            app:defaultQueryHint="Buscar por correo @uth.hn"
             app:iconifiedByDefault="false"
-            app:queryHint="Buscar por correo @uth.hn" />
+            app:queryHint="Buscar por correo @uth.hn"
+            app:theme="@style/ThemeOverlay.AppCompat.Light" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

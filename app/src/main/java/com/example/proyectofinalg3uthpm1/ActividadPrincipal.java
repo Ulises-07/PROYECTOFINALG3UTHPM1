@@ -2,33 +2,29 @@ package com.example.proyectofinalg3uthpm1;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import android.util.Log;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * Esta es la pantalla principal (feed).
- * REQUERIMIENTO: "Interfaz tipo scroll-down estilo social media".
- * Usaremos un RecyclerView para mostrar los archivos compartidos.
- */
 public class ActividadPrincipal extends AppCompatActivity {
 
     // Firebase
@@ -38,13 +34,13 @@ public class ActividadPrincipal extends AppCompatActivity {
 
     // Vistas
     private Toolbar barraHerramientas;
-    private RecyclerView listaFeedArchivos;
+    private RecyclerView listaGruposRecyclerView; // Cambiado nombre para claridad
     private FloatingActionButton botonFlotanteAgregar;
+    private TextView textoVacio; // Para mostrar si no hay grupos
 
-    // (Necesitarás crear un Adaptador para el RecyclerView)
-    private AdaptadorArchivos adaptadorArchivos;
-    private List<ModeloArchivo> listaDeArchivos;
-
+    // Adaptador para GRUPOS
+    private AdaptadorGrupos adaptadorGrupos;
+    private List<ModeloGrupo> listaDeGrupos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,109 +55,97 @@ public class ActividadPrincipal extends AppCompatActivity {
         // Configurar Toolbar
         barraHerramientas = findViewById(R.id.toolbarPrincipal);
         setSupportActionBar(barraHerramientas);
-        getSupportActionBar().setTitle("Feed de Archivos");
+        getSupportActionBar().setTitle("Mis Grupos"); // Cambiado título
 
         // Enlazar Vistas
-        listaFeedArchivos = findViewById(R.id.listaFeedArchivos);
+        listaGruposRecyclerView = findViewById(R.id.listaFeedArchivos); // Reusamos el ID del XML existente o cámbialo
         botonFlotanteAgregar = findViewById(R.id.botonFlotanteAgregar);
 
+        // Es recomendable agregar un TextView en tu XML (actividad_principal.xml) con id emptyView
+        // Si no lo tienes, puedes ignorar esta línea, pero ayuda a la UX
+        // textoVacio = findViewById(R.id.emptyView);
+
         if (usuarioActual == null) {
-            // Si por alguna razón el usuario no está logueado, volver a inicio
             irAInicioSesion();
             return;
         }
 
-        // Configurar RecyclerView (Paso clave)
-        // 1. Inicializar listaDeArchivos = new ArrayList<>();
-        listaDeArchivos = new ArrayList<>();
-        // 2. Inicializar adaptadorArchivos = new AdaptadorArchivos(this, listaDeArchivos);
-        adaptadorArchivos = new AdaptadorArchivos(this, listaDeArchivos);
-        // 3. listaFeedArchivos.setLayoutManager(new LinearLayoutManager(this));
-        listaFeedArchivos.setLayoutManager(new LinearLayoutManager(this));
-        // 4. listaFeedArchivos.setAdapter(adaptadorArchivos);
-        listaFeedArchivos.setAdapter(adaptadorArchivos);
+        // Configurar RecyclerView para GRUPOS
+        listaDeGrupos = new ArrayList<>();
+        adaptadorGrupos = new AdaptadorGrupos(this, listaDeGrupos, grupo -> {
+            // AL HACER CLIC EN UN GRUPO:
+            Intent intent = new Intent(ActividadPrincipal.this, ActividadDetalleGrupo.class);
+            intent.putExtra("idGrupo", grupo.getDocumentId());
+            intent.putExtra("nombreGrupo", grupo.getNombreGrupo());
+            startActivity(intent);
+        });
 
-        // Cargar datos del feed
-        cargarArchivosDelFeed();
+        listaGruposRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        listaGruposRecyclerView.setAdapter(adaptadorGrupos);
 
-        // Configurar botón flotante
+        // Cargar los grupos
+        cargarMisGrupos();
+
+        // Configurar botón flotante (Crear nuevo grupo)
         botonFlotanteAgregar.setOnClickListener(v -> {
-            // Lógica para enviar un nuevo archivo (abrir ActividadEnviarArchivo)
-            Toast.makeText(this, "Implementar envío de archivos", Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(ActividadPrincipal.this, ActividadEnviarArchivo.class);
+            Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
             startActivity(intent);
         });
     }
 
-    private void cargarArchivosDelFeed() {
-        // Esta es la consulta principal
-        // Deberás consultar la colección "Archivos"
-        // y filtrar por los grupos o compañeros del usuario actual.
-        // Por ahora, solo mostraremos un placeholder.
-
-        // Ejemplo de consulta (deberás adaptarla):
-
-        db.collection("Archivos")
-                .orderBy("fechaEnvio", Query.Direction.DESCENDING)
-                // .whereIn("idGrupoDestino", listaDeMisGrupos) // <-- Necesitarás obtener la lista de grupos del usuario
-                .limit(50)
+    private void cargarMisGrupos() {
+        // Consulta: Traer grupos donde el array "miembros" contiene mi UID
+        db.collection("Grupos")
+                .whereArrayContains("miembros", usuarioActual.getUid())
+                .orderBy("fechaCreacion", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) {
-                        Log.w("ActividadPrincipal", "Error al escuchar.", e);
+                        Log.w("ActividadPrincipal", "Error al cargar grupos.", e);
                         return;
                     }
 
-                    listaDeArchivos.clear();
-                    for (DocumentSnapshot doc : snapshots.getDocuments()) {
-                        ModeloArchivo archivo = doc.toObject(ModeloArchivo.class);
-                        if (archivo != null) {
-                            archivo.setDocumentId(doc.getId()); // Guardar el ID del documento
-                            listaDeArchivos.add(archivo);
+                    if (snapshots != null) {
+                        listaDeGrupos.clear();
+                        for (DocumentSnapshot doc : snapshots.getDocuments()) {
+                            ModeloGrupo grupo = doc.toObject(ModeloGrupo.class);
+                            if (grupo != null) {
+                                grupo.setDocumentId(doc.getId());
+                                listaDeGrupos.add(grupo);
+                            }
                         }
+                        adaptadorGrupos.notifyDataSetChanged();
                     }
-                    adaptadorArchivos.notifyDataSetChanged();
                 });
-
     }
-
-    // --- Manejo del Menú de Opciones (Toolbar) ---
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Infla el menú (agrega items a la action bar)
         getMenuInflater().inflate(R.menu.menu_principal, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        // Maneja los clics en los items del menú
         int id = item.getItemId();
 
         if (id == R.id.menu_perfil) {
-            // Ir a la actividad de perfil
             Intent intent = new Intent(ActividadPrincipal.this, ActividadPerfilUsuario.class);
             startActivity(intent);
             return true;
         } else if (id == R.id.menu_buscar) {
-            // Ir a la actividad de búsqueda de usuarios
             Intent intent = new Intent(ActividadPrincipal.this, ActividadBusqueda.class);
             startActivity(intent);
-            Toast.makeText(this, "Implementar Búsqueda", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.menu_grupos) {
-            // Ir a la actividad de gestión de grupos
+            // Ya estamos en grupos, o podemos ir a crear
             Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
             startActivity(intent);
-            Toast.makeText(this, "Implementar Grupos", Toast.LENGTH_SHORT).show();
             return true;
         } else if (id == R.id.menu_cerrar_sesion) {
-            // Cerrar sesión
             mAuth.signOut();
             irAInicioSesion();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

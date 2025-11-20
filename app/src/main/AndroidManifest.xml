@@ -55,6 +55,10 @@
             android:name=".ActividadEnviarArchivo"
             android:exported="false"
             android:label="Enviar Archivo" />
+        <activity
+            android:name=".ActividadDetalleGrupo"
+            android:exported="false"
+            android:label="Detalle Grupo"/>
 
         <!-- Servicio para Notificaciones Push (FCM) -->
         <service

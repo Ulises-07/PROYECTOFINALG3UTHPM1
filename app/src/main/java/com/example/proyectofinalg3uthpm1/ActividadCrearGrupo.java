@@ -81,33 +81,56 @@ public class ActividadCrearGrupo extends AppCompatActivity {
     }
 
     private void cargarCompaneros() {
-        // REQUERIMIENTO: Opción para crear grupos desde lista de contactos UTH
-        // 1. Obtener la lista de UIDs de mis compañeros
-        DocumentReference refMiLista = db.collection("Compañeros").document(usuarioActual.getUid());
-        refMiLista.get().addOnSuccessListener(documentSnapshot -> {
+        if (usuarioActual == null) {
+            Toast.makeText(this, "No se pudo verificar tu sesión.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // --- CORRECCIÓN ---
+        // 1. Apuntar a nuestro PROPIO documento en la colección "Usuarios"
+        DocumentReference miPerfilRef = db.collection("Usuarios").document(usuarioActual.getUid());
+
+        miPerfilRef.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
-                List<String> uidsCompaneros = (List<String>) documentSnapshot.get("listaCompañeros");
+                // 2. Obtener la lista (array) de UIDs del campo "companeros"
+                List<String> uidsCompaneros = (List<String>) documentSnapshot.get("companeros");
+
                 if (uidsCompaneros != null && !uidsCompaneros.isEmpty()) {
-                    // 2. Buscar los datos de esos compañeros en la colección "Usuarios"
+                    // 3. Buscar los perfiles completos de esos compañeros usando la lista de UIDs
                     db.collection("Usuarios")
                             .whereIn(com.google.firebase.firestore.FieldPath.documentId(), uidsCompaneros)
                             .get()
                             .addOnSuccessListener(querySnapshot -> {
+                                listaDeCompaneros.clear(); // Limpiar la lista antes de llenarla
                                 for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                                     ModeloUsuario usuario = doc.toObject(ModeloUsuario.class);
-                                    usuario.setUid(doc.getId()); // Guardar el UID
-                                    listaDeCompaneros.add(usuario);
+                                    if (usuario != null) {
+                                        usuario.setUid(doc.getId()); // Guardar el UID en el objeto
+                                        listaDeCompaneros.add(usuario);
+                                    }
                                 }
-                                adaptadorSeleccion.notifyDataSetChanged();
+                                adaptadorSeleccion.notifyDataSetChanged(); // Actualizar la lista en pantalla
+
+                                if(listaDeCompaneros.isEmpty()){
+                                    Toast.makeText(this, "No se encontraron los perfiles de tus compañeros.", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "Error al buscar los perfiles de los compañeros", e);
+                                Toast.makeText(this, "Error al cargar los perfiles de compañeros.", Toast.LENGTH_SHORT).show();
                             });
                 } else {
-                    Toast.makeText(this, "No tienes compañeros para agregar.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Aún no has agregado compañeros.", Toast.LENGTH_SHORT).show();
                 }
             } else {
-                Toast.makeText(this, "Aún no has agregado compañeros.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "No se pudo encontrar tu perfil de usuario.", Toast.LENGTH_SHORT).show();
             }
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Error al obtener tu perfil", e);
+            Toast.makeText(this, "Error al cargar tu lista de compañeros.", Toast.LENGTH_SHORT).show();
         });
     }
+
 
     private void crearGrupo() {
         String nombreGrupo = campoNombreGrupo.getText().toString().trim();

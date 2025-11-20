@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ActividadDetalleGrupo">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/Theme.AppCompat.Light.DarkActionBar">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbarDetalleGrupo"
+            android:layout_width="match_parent"
+            android:layout_marginTop="35dp"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/holo_green_dark"
+            app:popupTheme="@style/Theme.AppCompat.Light" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Mensaje por si no hay archivos -->
+        <TextView
+            android:id="@+id/textoSinArchivos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="No hay archivos en este grupo aún.\n¡Sube el primero!"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listaArchivosGrupo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            tools:layout_editor_absoluteX="5dp"
+            tools:layout_editor_absoluteY="-1dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/botonSubirArchivoGrupo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="Subir Archivo"
+        android:src="@android:drawable/ic_menu_upload"
+        app:backgroundTint="@android:color/holo_blue_dark" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

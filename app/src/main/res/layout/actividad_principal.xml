@@ -16,6 +16,7 @@
             android:id="@+id/toolbarPrincipal"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:layout_marginTop="35dp"
             android:background="@android:color/holo_green_dark"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
@@ -26,9 +27,9 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listaFeedArchivos"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior"
-        android:padding="8dp"/>
+        android:layout_height="667dp"
+        android:padding="8dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     <!-- tools:listitem="@layout/item_archivo_feed" /> -->
 
     <!-- Botón Flotante para agregar nuevos archivos -->
@@ -37,7 +38,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="30dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginBottom="50dp"
         android:contentDescription="Enviar nuevo archivo"
         android:src="@drawable/outline_add_circle_24"
         app:backgroundTint="@android:color/holo_green_dark"

@@ -25,9 +25,12 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ActividadBusqueda extends AppCompatActivity {
 
@@ -112,25 +115,19 @@ public class ActividadBusqueda extends AppCompatActivity {
 
         // REQUERIMIENTO: Motor de búsqueda para encontrar estudiantes
         // Búsqueda por rango de correo.
-        // En tu método buscarUsuarios()
         db.collection("Usuarios")
                 .whereEqualTo("correo", consultaCorreo.toLowerCase())
                 .get()
-                .addOnCompleteListener(task -> { // Usando una expresión lambda para más claridad
+                .addOnCompleteListener(task -> {
                     progressBar.setVisibility(View.GONE);
                     if (task.isSuccessful()) {
                         if (task.getResult().isEmpty()) {
                             Toast.makeText(ActividadBusqueda.this, "No se encontraron usuarios.", Toast.LENGTH_SHORT).show();
                         } else {
-                            // --- APLICA LA SOLUCIÓN AQUÍ ---
-                            // 1. Limpia la lista antes de añadir nuevos resultados
                             listaUsuarios.clear();
-                            // 2. Itera sobre los documentos, no sobre los objetos ya convertidos
                             for (DocumentSnapshot document : task.getResult().getDocuments()) {
-                                // 3. Convierte el documento a un objeto ModeloUsuario
                                 ModeloUsuario usuario = document.toObject(ModeloUsuario.class);
                                 if (usuario != null) {
-                                    // 4. Asigna el ID del documento al objeto
                                     usuario.setUid(document.getId());
 
                                     // 5. Añade a la lista si no es el usuario actual
@@ -150,40 +147,32 @@ public class ActividadBusqueda extends AppCompatActivity {
     }
 
     private void agregarCompanero(ModeloUsuario usuario, Button boton) {
-        // REQUERIMIENTO: Agregar como compañeros
-        boton.setEnabled(false); // Deshabilitar botón para evitar doble clic
-        boton.setText("Agregado");
+        FirebaseUser usuarioConectado = FirebaseAuth.getInstance().getCurrentUser();
+        if (usuarioConectado == null) {
+            Toast.makeText(this, "Tu sesión ha expirado. Por favor, inicia sesión de nuevo.", Toast.LENGTH_LONG).show();
+            return;
+        }
 
-        // Usamos la colección "Compañeros" como en ESTRUCTURA_FIREBASE.md
-        DocumentReference refMiLista = db.collection("Compañeros").document(usuarioActual.getUid());
+        boton.setEnabled(false);
+        boton.setText("Agregando...");
 
-        // FieldValue.arrayUnion() asegura que no se añadan duplicados
-        refMiLista.update("listaCompañeros", FieldValue.arrayUnion(usuario.getUid()))
+        // --- CAMBIO IMPORTANTE: Ahora apuntamos a nuestro PROPIO documento en la colección 'Usuarios' ---
+        DocumentReference miPerfilRef = db.collection("Usuarios").document(usuarioConectado.getUid());
+
+        // Usamos arrayUnion para añadir el UID del nuevo compañero a nuestra lista 'companeros'
+        miPerfilRef.update("companeros", FieldValue.arrayUnion(usuario.getUid()))
                 .addOnSuccessListener(aVoid -> {
+                    boton.setText("Agregado");
                     Toast.makeText(ActividadBusqueda.this, "Añadido como compañero.", Toast.LENGTH_SHORT).show();
                 })
                 .addOnFailureListener(e -> {
-                    // Si falla, probablemente el documento no existe, hay que crearlo.
-                    if (e.getMessage().contains("No document to update")) {
-                        // Creamos el documento
-                        List<String> primeraLista = new ArrayList<>();
-                        primeraLista.add(usuario.getUid());
-                        db.collection("Compañeros").document(usuarioActual.getUid())
-                                .set(new java.util.HashMap<String, Object>() {{
-                                    put("listaCompañeros", primeraLista);
-                                }})
-                                .addOnSuccessListener(v -> Toast.makeText(ActividadBusqueda.this, "Añadido como compañero.", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e2 -> Toast.makeText(ActividadBusqueda.this, "Error al añadir: " + e2.getMessage(), Toast.LENGTH_SHORT).show());
-                    } else {
-                        // Otro error
-                        Toast.makeText(ActividadBusqueda.this, "Error al añadir: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
+                    boton.setEnabled(true);
+                    boton.setText("Agregar");
+                    Log.e(TAG, "Error al añadir compañero", e);
+                    Toast.makeText(ActividadBusqueda.this, "Error al agregar: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
-
-        // (Opcional: añadirnos a la lista del otro usuario también)
-        // DocumentReference refSuLista = db.collection("Compañeros").document(usuario.getUid());
-        // refSuLista.update("listaCompañeros", FieldValue.arrayUnion(usuarioActual.getUid()));
     }
+
 
     @Override
     public boolean onSupportNavigateUp() {
