@@ -27,7 +27,7 @@ import java.util.Locale;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-// Adaptador para el feed principal de archivos
+
 public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.ArchivoViewHolder> {
 
     private final Context contexto;
@@ -51,7 +51,6 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
     public void onBindViewHolder(@NonNull ArchivoViewHolder holder, int position) {
         ModeloArchivo archivo = listaArchivos.get(position);
 
-        // Setear datos del emisor
         holder.textoNombreEmisor.setText(archivo.getNombreEmisor());
         if (archivo.getFechaEnvio() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
@@ -60,32 +59,27 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
             holder.textoFecha.setText("Enviando...");
         }
 
-        // TODO: Cargar la foto de perfil del emisor usando Glide y el idUsuarioEmisor
-        // (Requeriría una consulta extra o guardar la URL de la foto en el ModeloArchivo)
-        holder.imagenPerfil.setImageResource(R.drawable.ic_profile_placeholder);
+
+        holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
 
 
-        // REQUERIMIENTO: Visualización de archivos
         String tipo = archivo.getTipoArchivo();
         if (tipo != null && tipo.startsWith("image/")) {
-            // Es una imagen
+
             holder.imagenContenido.setVisibility(View.VISIBLE);
             holder.layoutArchivoGenerico.setVisibility(View.GONE);
             Glide.with(contexto)
                     .load(archivo.getUrlArchivo())
-                    .placeholder(R.drawable.ic_profile_placeholder) // Usar un placeholder de carga
+                    .placeholder(R.drawable.outline_account_circle_24)
                     .into(holder.imagenContenido);
         } else {
-            // Es un PDF, video u otro
             holder.imagenContenido.setVisibility(View.GONE);
             holder.layoutArchivoGenerico.setVisibility(View.VISIBLE);
             holder.textoNombreArchivo.setText(archivo.getNombreArchivo());
 
-            // TODO: Poner ícono bonito según tipo (pdf, video, etc)
             holder.iconoTipoArchivo.setImageResource(R.drawable.ic_file);
         }
 
-        // REQUERIMIENTO: Posibilidad de eliminar archivos
         if (archivo.getIdUsuarioEmisor().equals(uidUsuarioActual)) {
             holder.botonEliminar.setVisibility(View.VISIBLE);
             holder.botonEliminar.setOnClickListener(v -> {
@@ -95,10 +89,8 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
             holder.botonEliminar.setVisibility(View.GONE);
         }
 
-        // Clic para abrir el archivo (PDF, Video, etc.)
         holder.itemView.setOnClickListener(v -> {
             if (tipo != null && !tipo.startsWith("image/")) {
-                // REQUERIMIENTO: Abrir con apps compatibles
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW);
                     intent.setDataAndType(Uri.parse(archivo.getUrlArchivo()), tipo);
@@ -124,16 +116,13 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
     }
 
     private void eliminarArchivo(ModeloArchivo archivo, int position) {
-        // 1. Eliminar documento de Firestore
         FirebaseFirestore.getInstance().collection("Archivos").document(archivo.getDocumentId())
                 .delete()
                 .addOnSuccessListener(aVoid -> {
-                    // 2. Eliminar archivo de Storage
                     FirebaseStorage.getInstance().getReferenceFromUrl(archivo.getUrlArchivo())
                             .delete()
                             .addOnSuccessListener(aVoid1 -> {
                                 Toast.makeText(contexto, "Archivo eliminado.", Toast.LENGTH_SHORT).show();
-                                // (El listener de ActividadPrincipal se encargará de removerlo de la UI)
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(contexto, "Error al eliminar de Storage.", Toast.LENGTH_SHORT).show();
@@ -151,7 +140,6 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
         return listaArchivos.size();
     }
 
-    // ViewHolder
     static class ArchivoViewHolder extends RecyclerView.ViewHolder {
         CircleImageView imagenPerfil;
         TextView textoNombreEmisor, textoFecha, textoNombreArchivo;

@@ -1,20 +1,16 @@
 package com.example.proyectofinalg3uthpm1;
 
-// Modelo de datos para un usuario (para Firestore)
 public class ModeloUsuario {
 
-    // Nombres de variables coinciden con los campos en ESTRUCTURA_FIREBASE.md
     private String nombreCompleto;
     private String correo;
     private String carrera;
     private String urlFotoPerfil;
-    private String uid; // Para guardar el ID del documento
+    private String uid;
 
-    // Constructor vacío (requerido por Firestore)
     public ModeloUsuario() {
     }
 
-    // Constructor completo
     public ModeloUsuario(String nombreCompleto, String correo, String carrera, String urlFotoPerfil) {
         this.nombreCompleto = nombreCompleto;
         this.correo = correo;
@@ -22,7 +18,6 @@ public class ModeloUsuario {
         this.urlFotoPerfil = urlFotoPerfil;
     }
 
-    // --- Getters ---
     public String getNombreCompleto() {
         return nombreCompleto;
     }
@@ -43,7 +38,6 @@ public class ModeloUsuario {
         return uid;
     }
 
-    // --- Setters ---
     public void setNombreCompleto(String nombreCompleto) {
         this.nombreCompleto = nombreCompleto;
     }

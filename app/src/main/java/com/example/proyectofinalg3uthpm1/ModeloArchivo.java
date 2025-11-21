@@ -3,28 +3,23 @@ package com.example.proyectofinalg3uthpm1;
 import com.google.firebase.firestore.ServerTimestamp;
 import java.util.Date;
 
-// Modelo de datos para un archivo en el feed (para Firestore)
 public class ModeloArchivo {
 
-    // Nombres de campos en español (de ESTRUCTURA_FIREBASE.md)
     private String idUsuarioEmisor;
     private String nombreEmisor;
     private String urlArchivo;
     private String nombreArchivo;
-    private String tipoArchivo; // "imagen", "video", "pdf"
+    private String tipoArchivo;
     private String idGrupoDestino;
     private String idUsuarioDestino;
     @ServerTimestamp
     private Date fechaEnvio;
 
-    // ID del documento (para poder borrarlo)
     private String documentId;
 
-    // Constructor vacío (requerido por Firestore)
     public ModeloArchivo() {
     }
 
-    // --- Getters ---
     public String getIdUsuarioEmisor() {
         return idUsuarioEmisor;
     }
@@ -61,8 +56,7 @@ public class ModeloArchivo {
         return documentId;
     }
 
-    // --- Setters ---
-    // (Firestore usa los setters para poblar el objeto)
+
     public void setIdUsuarioEmisor(String idUsuarioEmisor) {
         this.idUsuarioEmisor = idUsuarioEmisor;
     }

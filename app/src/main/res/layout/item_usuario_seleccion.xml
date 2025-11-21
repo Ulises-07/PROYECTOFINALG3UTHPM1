@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Layout para seleccionar un usuario (con CheckBox) -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -12,7 +11,7 @@
         android:id="@+id/imagenPerfilUsuarioSel"
         android:layout_width="45dp"
         android:layout_height="45dp"
-        android:src="@drawable/rounded_account_circle_24" />
+        android:src="@drawable/outline_account_circle_24" />
 
     <LinearLayout
         android:layout_width="0dp"

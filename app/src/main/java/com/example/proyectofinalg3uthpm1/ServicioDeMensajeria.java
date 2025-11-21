@@ -17,45 +17,34 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-// REQUERIMIENTO: Notificaciones push
 public class ServicioDeMensajeria extends FirebaseMessagingService {
 
     private static final String TAG = "ServicioMensajeria";
     private static final String CANAL_ID = "canal_notificaciones_fcm";
 
-    /**
-     * Se llama cuando se recibe un mensaje.
-     */
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         Log.d(TAG, "Recibido de: " + remoteMessage.getFrom());
 
-        // Verificar si el mensaje contiene una notificación
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Cuerpo de la Notificación: " + remoteMessage.getNotification().getBody());
             mostrarNotificacion(remoteMessage.getNotification().getTitle(), remoteMessage.getNotification().getBody());
         }
     }
 
-    /**
-     * Se llama cuando se genera un nuevo token de FCM.
-     * Este token es el que identifica al dispositivo.
-     */
+
     @Override
     public void onNewToken(@NonNull String token) {
         Log.d(TAG, "Nuevo token de FCM: " + token);
 
-        // Enviar este token a tu servidor o Firestore
         enviarTokenAFirestore(token);
     }
 
-    /**
-     * Guarda el token de FCM en el documento del usuario en Firestore.
-     */
+
     private void enviarTokenAFirestore(String token) {
         FirebaseUser usuario = FirebaseAuth.getInstance().getCurrentUser();
         if (usuario != null) {
-            // Nombres de campos en español
             FirebaseFirestore.getInstance()
                     .collection("Usuarios")
                     .document(usuario.getUid())
@@ -65,9 +54,6 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
         }
     }
 
-    /**
-     * Crea y muestra una notificación simple.
-     */
     private void mostrarNotificacion(String titulo, String cuerpo) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -85,7 +71,6 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
         NotificationManager notificationManager =
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
-        // Desde Android Oreo (API 26) se necesita un canal de notificación.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(CANAL_ID,
                     "Notificaciones Generales",

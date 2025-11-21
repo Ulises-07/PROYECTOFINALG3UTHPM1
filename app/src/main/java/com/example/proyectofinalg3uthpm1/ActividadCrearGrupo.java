@@ -31,18 +31,15 @@ public class ActividadCrearGrupo extends AppCompatActivity {
 
     private static final String TAG = "ActividadCrearGrupo";
 
-    // Vistas
     private Toolbar toolbar;
     private EditText campoNombreGrupo;
     private RecyclerView listaCompaneros;
     private Button botonCrearGrupo;
     private ProgressBar progressBar;
 
-    // Firebase
     private FirebaseFirestore db;
     private FirebaseUser usuarioActual;
 
-    // Variables
     private AdaptadorUsuarioSeleccion adaptadorSeleccion;
     private List<ModeloUsuario> listaDeCompaneros;
 
@@ -51,32 +48,26 @@ public class ActividadCrearGrupo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividad_crear_grupo);
 
-        // Inicializar Firebase
         db = FirebaseFirestore.getInstance();
         usuarioActual = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Configurar Toolbar
         toolbar = findViewById(R.id.toolbarCrearGrupo);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Crear Nuevo Grupo");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Enlazar Vistas
         campoNombreGrupo = findViewById(R.id.campoNombreGrupo);
         listaCompaneros = findViewById(R.id.listaCompanerosParaGrupo);
         botonCrearGrupo = findViewById(R.id.botonCrearGrupo);
         progressBar = findViewById(R.id.barraProgresoGrupo);
 
-        // Configurar RecyclerView
         listaDeCompaneros = new ArrayList<>();
         adaptadorSeleccion = new AdaptadorUsuarioSeleccion(this, listaDeCompaneros);
         listaCompaneros.setLayoutManager(new LinearLayoutManager(this));
         listaCompaneros.setAdapter(adaptadorSeleccion);
 
-        // Cargar la lista de compañeros
         cargarCompaneros();
 
-        // Configurar botón
         botonCrearGrupo.setOnClickListener(v -> crearGrupo());
     }
 
@@ -86,30 +77,26 @@ public class ActividadCrearGrupo extends AppCompatActivity {
             return;
         }
 
-        // --- CORRECCIÓN ---
-        // 1. Apuntar a nuestro PROPIO documento en la colección "Usuarios"
         DocumentReference miPerfilRef = db.collection("Usuarios").document(usuarioActual.getUid());
 
         miPerfilRef.get().addOnSuccessListener(documentSnapshot -> {
             if (documentSnapshot.exists()) {
-                // 2. Obtener la lista (array) de UIDs del campo "companeros"
                 List<String> uidsCompaneros = (List<String>) documentSnapshot.get("companeros");
 
                 if (uidsCompaneros != null && !uidsCompaneros.isEmpty()) {
-                    // 3. Buscar los perfiles completos de esos compañeros usando la lista de UIDs
                     db.collection("Usuarios")
                             .whereIn(com.google.firebase.firestore.FieldPath.documentId(), uidsCompaneros)
                             .get()
                             .addOnSuccessListener(querySnapshot -> {
-                                listaDeCompaneros.clear(); // Limpiar la lista antes de llenarla
+                                listaDeCompaneros.clear();
                                 for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
                                     ModeloUsuario usuario = doc.toObject(ModeloUsuario.class);
                                     if (usuario != null) {
-                                        usuario.setUid(doc.getId()); // Guardar el UID en el objeto
+                                        usuario.setUid(doc.getId());
                                         listaDeCompaneros.add(usuario);
                                     }
                                 }
-                                adaptadorSeleccion.notifyDataSetChanged(); // Actualizar la lista en pantalla
+                                adaptadorSeleccion.notifyDataSetChanged();
 
                                 if(listaDeCompaneros.isEmpty()){
                                     Toast.makeText(this, "No se encontraron los perfiles de tus compañeros.", Toast.LENGTH_SHORT).show();
@@ -150,18 +137,15 @@ public class ActividadCrearGrupo extends AppCompatActivity {
         progressBar.setVisibility(View.VISIBLE);
         botonCrearGrupo.setEnabled(false);
 
-        // Añadir al creador (nosotros) a la lista de miembros
         miembrosSeleccionados.add(usuarioActual.getUid());
 
-        // Crear el objeto ModeloGrupo
         ModeloGrupo nuevoGrupo = new ModeloGrupo(nombreGrupo, usuarioActual.getUid(), miembrosSeleccionados);
 
-        // Guardar en Firestore
         db.collection("Grupos").add(nuevoGrupo)
                 .addOnSuccessListener(documentReference -> {
                     progressBar.setVisibility(View.GONE);
                     Toast.makeText(ActividadCrearGrupo.this, "Grupo '" + nombreGrupo + "' creado.", Toast.LENGTH_SHORT).show();
-                    finish(); // Volver a la actividad principal
+                    finish();
                 })
                 .addOnFailureListener(e -> {
                     progressBar.setVisibility(View.GONE);

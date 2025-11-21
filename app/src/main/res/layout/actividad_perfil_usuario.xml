@@ -5,22 +5,22 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="24dp"
+    android:background="@drawable/imagen_fondo"
     tools:context=".ActividadPerfilUsuario">
 
     <TextView
         android:id="@+id/tituloPerfil"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="Editar Perfil"
+        android:textColor="@color/COLORUTH"
         android:textSize="32sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Imagen de Perfil Circular -->
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/imagenPerfil"
         android:layout_width="120dp"
@@ -32,7 +32,6 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tituloPerfil" />
-    <!-- NOTA: Necesitarás crear 'ic_profile_placeholder.xml' en drawable -->
 
     <TextView
         android:id="@+id/textoCambiarFoto"
@@ -45,7 +44,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Nombre Completo -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutNombrePerfil"
         android:layout_width="0dp"
@@ -64,7 +62,6 @@
             android:inputType="textPersonName" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Correo (Deshabilitado) -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutCorreoPerfil"
         android:layout_width="0dp"
@@ -85,7 +82,6 @@
             android:textColor="@android:color/darker_gray"/>
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Carrera -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/layoutCarreraPerfil"
         android:layout_width="0dp"
@@ -104,7 +100,7 @@
             android:inputType="textCapWords" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Fecha de Nacimiento (Layout con botón) -->
+
     <LinearLayout
         android:id="@+id/layoutFechaNacimiento"
         android:layout_width="0dp"
@@ -136,17 +132,16 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginStart="8dp"
-            android:backgroundTint="@android:color/holo_blue_dark"
+            android:backgroundTint="@color/COLORUTH"
             android:text="Elegir" />
     </LinearLayout>
-
 
     <Button
         android:id="@+id/botonGuardarCambios"
         android:layout_width="0dp"
         android:layout_height="60dp"
         android:layout_marginTop="24dp"
-        android:backgroundTint="@android:color/holo_blue_dark"
+        android:backgroundTint="@color/COLORUTH"
         android:text="Guardar Cambios"
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"

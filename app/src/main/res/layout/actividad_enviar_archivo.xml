@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/imagen_fondo"
     tools:context=".ActividadEnviarArchivo">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -17,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_marginTop="35dp"
-            android:background="@android:color/holo_blue_dark"
+            android:background="@color/COLORUTH"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -39,7 +40,6 @@
                 app:icon="@drawable/ic_file"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
 
-            <!-- Previsualización de Imagen -->
             <ImageView
                 android:id="@+id/imagenVistaPrevia"
                 android:layout_width="match_parent"
@@ -51,7 +51,7 @@
                 tools:visibility="visible"
                 android:contentDescription="Vista previa de la imagen seleccionada" />
 
-            <!-- Info de Archivo -->
+
             <TextView
                 android:id="@+id/textoInfoArchivo"
                 android:layout_width="wrap_content"
@@ -61,7 +61,6 @@
                 tools:text="Archivo: documento_importante.pdf (2.5 MB)"
                 tools:visibility="visible" />
 
-            <!-- TODO: Añadir Spinner para seleccionar grupo o compañero -->
             <Spinner
                 android:id="@+id/spinnerDestino"
                 android:layout_width="match_parent"
@@ -86,11 +85,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="24dp"
-                android:backgroundTint="@android:color/holo_blue_dark"
+                android:backgroundTint="@color/COLORUTH"
                 android:enabled="false"
                 android:text="Enviar"
-                android:textSize="18sp" /> <!-- Deshabilitado hasta seleccionar archivo -->
-
+                android:textSize="18sp" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

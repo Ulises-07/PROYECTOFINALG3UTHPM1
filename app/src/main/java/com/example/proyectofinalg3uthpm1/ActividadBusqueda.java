@@ -36,17 +36,14 @@ public class ActividadBusqueda extends AppCompatActivity {
 
     private static final String TAG = "ActividadBusqueda";
 
-    // Firebase
     private FirebaseFirestore db;
     private FirebaseUser usuarioActual;
 
-    // Vistas
     private Toolbar toolbar;
     private SearchView searchView;
     private RecyclerView recyclerView;
     private ProgressBar progressBar;
 
-    // Variables
     private AdaptadorUsuario adaptadorUsuario;
     private List<ModeloUsuario> listaUsuarios;
 
@@ -55,32 +52,25 @@ public class ActividadBusqueda extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividad_busqueda);
 
-        // Inicializar Firebase
         db = FirebaseFirestore.getInstance();
         usuarioActual = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Configurar Toolbar
         toolbar = findViewById(R.id.toolbarBusqueda);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Buscar Compañeros");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true); // Flecha de retroceso
 
-        // Enlazar Vistas
         searchView = findViewById(R.id.searchViewUsuarios);
         recyclerView = findViewById(R.id.listaResultadosBusqueda);
         progressBar = findViewById(R.id.barraProgresoBusqueda);
 
-        // Configurar RecyclerView
         listaUsuarios = new ArrayList<>();
-        // Implementamos el listener del adaptador
         adaptadorUsuario = new AdaptadorUsuario(this, listaUsuarios, (usuario, boton) -> {
-            // Clic en "Agregar"
             agregarCompanero(usuario, boton);
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adaptadorUsuario);
 
-        // Configurar SearchView
         configurarSearchView();
     }
 
@@ -88,17 +78,15 @@ public class ActividadBusqueda extends AppCompatActivity {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                // El usuario presionó "Enter"
                 buscarUsuarios(query);
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                // Opcional: buscar mientras escribe (puede gastar muchas lecturas de Firestore)
-                // if (newText.length() > 3) {
-                //     buscarUsuarios(newText);
-                // }
+                 //if (newText.length() > 3) {
+                   //buscarUsuarios(newText);
+                //}
                 return false;
             }
         });
@@ -113,8 +101,6 @@ public class ActividadBusqueda extends AppCompatActivity {
         listaUsuarios.clear();
         adaptadorUsuario.notifyDataSetChanged();
 
-        // REQUERIMIENTO: Motor de búsqueda para encontrar estudiantes
-        // Búsqueda por rango de correo.
         db.collection("Usuarios")
                 .whereEqualTo("correo", consultaCorreo.toLowerCase())
                 .get()
@@ -130,7 +116,6 @@ public class ActividadBusqueda extends AppCompatActivity {
                                 if (usuario != null) {
                                     usuario.setUid(document.getId());
 
-                                    // 5. Añade a la lista si no es el usuario actual
                                     if (!usuario.getCorreo().equals(usuarioActual.getEmail())) {
                                         listaUsuarios.add(usuario);
                                     }
@@ -156,10 +141,8 @@ public class ActividadBusqueda extends AppCompatActivity {
         boton.setEnabled(false);
         boton.setText("Agregando...");
 
-        // --- CAMBIO IMPORTANTE: Ahora apuntamos a nuestro PROPIO documento en la colección 'Usuarios' ---
         DocumentReference miPerfilRef = db.collection("Usuarios").document(usuarioConectado.getUid());
 
-        // Usamos arrayUnion para añadir el UID del nuevo compañero a nuestra lista 'companeros'
         miPerfilRef.update("companeros", FieldValue.arrayUnion(usuario.getUid()))
                 .addOnSuccessListener(aVoid -> {
                     boton.setText("Agregado");
@@ -176,7 +159,6 @@ public class ActividadBusqueda extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        // Maneja el clic en la flecha de retroceso
         finish();
         return true;
     }

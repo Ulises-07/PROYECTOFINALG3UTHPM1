@@ -25,13 +25,11 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class ActividadInicioSesion extends AppCompatActivity {
 
-    // Declaración de variables (nombres en español)
     EditText campoCorreo, campoClave;
     Button botonIniciarSesion;
     TextView textoIrARegistro, textoOlvideClave;
     ProgressBar barraProgreso;
 
-    // Firebase
     private FirebaseAuth mAuth;
 
     @Override
@@ -39,10 +37,8 @@ public class ActividadInicioSesion extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividad_inicio_sesion);
 
-        // Inicializar Firebase Auth
         mAuth = FirebaseAuth.getInstance();
 
-        // Enlazar Vistas (ViewBinding sería más moderno, pero esto es estándar)
         campoCorreo = findViewById(R.id.campoCorreoInicio);
         campoClave = findViewById(R.id.campoClaveInicio);
         botonIniciarSesion = findViewById(R.id.botonIniciarSesion);
@@ -50,7 +46,6 @@ public class ActividadInicioSesion extends AppCompatActivity {
         textoOlvideClave = findViewById(R.id.textoOlvideClave);
         barraProgreso = findViewById(R.id.barraProgresoInicio);
 
-        // Configurar Listeners (eventos de clic)
         botonIniciarSesion.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,7 +56,6 @@ public class ActividadInicioSesion extends AppCompatActivity {
         textoIrARegistro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Navegar a la actividad de registro
                 Intent intent = new Intent(ActividadInicioSesion.this, ActividadRegistro.class);
                 startActivity(intent);
             }
@@ -70,7 +64,6 @@ public class ActividadInicioSesion extends AppCompatActivity {
         textoOlvideClave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Lógica para recuperar contraseña
                 recuperarClave();
             }
         });
@@ -87,12 +80,11 @@ public class ActividadInicioSesion extends AppCompatActivity {
             return;
         }
 
-        // Validación de correo UTH (ejemplo simple)
-//        if (!correo.endsWith("@uth.hn")) {
-//            campoCorreo.setError("Debe ser un correo institucional (@uth.hn).");
-//            campoCorreo.requestFocus();
-//            return;
-//        }
+       if (!correo.endsWith("@uth.hn")) {
+           campoCorreo.setError("Debe ser un correo institucional (@uth.hn).");
+           campoCorreo.requestFocus();
+           return;
+       }
 
         if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
             campoCorreo.setError("Correo no válido.");
@@ -112,11 +104,9 @@ public class ActividadInicioSesion extends AppCompatActivity {
             return;
         }
 
-        // Mostrar progreso
         barraProgreso.setVisibility(View.VISIBLE);
         botonIniciarSesion.setEnabled(false);
 
-        // Iniciar sesión con Firebase
         mAuth.signInWithEmailAndPassword(correo, clave)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -125,26 +115,21 @@ public class ActividadInicioSesion extends AppCompatActivity {
                         botonIniciarSesion.setEnabled(true);
 
                         if (task.isSuccessful()) {
-                            // Inicio de sesión exitoso
+
                             FirebaseUser usuario = mAuth.getCurrentUser();
 
-                            // REQUERIMIENTO: Verificar correo
                             if (usuario != null && usuario.isEmailVerified()) {
-                                // Correo verificado, ir a la app principal
                                 Toast.makeText(ActividadInicioSesion.this, "Inicio de sesión exitoso.", Toast.LENGTH_SHORT).show();
                                 Intent intent = new Intent(ActividadInicioSesion.this, ActividadPrincipal.class);
-                                // Limpiar el stack de actividades
                                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                                 startActivity(intent);
                                 finish();
                             } else {
-                                // Correo no verificado
-                                mAuth.signOut(); // Desloguear para que intente de nuevo
+                                mAuth.signOut();
                                 Toast.makeText(ActividadInicioSesion.this, "Correo no verificado. Revisa tu bandeja de entrada.", Toast.LENGTH_LONG).show();
                             }
 
                         } else {
-                            // Error en inicio de sesión
                             Toast.makeText(ActividadInicioSesion.this, "Error al iniciar sesión.", Toast.LENGTH_LONG).show();
                         }
                     }

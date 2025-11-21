@@ -17,7 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.bumptech.glide.Glide; // Importar Glide
+import com.bumptech.glide.Glide;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -38,28 +38,24 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-// Opcional: Para imagen circular
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ActividadPerfilUsuario extends AppCompatActivity {
 
-    // Constante para el selector de imágenes
     private static final int CODIGO_SELECCION_IMAGEN = 101;
 
-    // Vistas
+
     private CircleImageView imagenPerfil;
     private EditText campoNombrePerfil, campoCorreoPerfil, campoCarreraPerfil, campoFechaNacimiento;
     private Button botonGuardarCambios, botonElegirFecha;
     private ProgressBar barraProgresoPerfil;
 
-    // Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private FirebaseStorage storage;
     private FirebaseUser usuarioActual;
     private DocumentReference docRefUsuario;
 
-    // Variables
     private Uri uriImagenSeleccionada;
     private String urlFotoPerfilActual;
     private final Calendar calendario = Calendar.getInstance();
@@ -69,22 +65,18 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividad_perfil_usuario);
 
-        // Inicializar Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         usuarioActual = mAuth.getCurrentUser();
 
         if (usuarioActual == null) {
-            // No debería pasar si la app está bien, pero por seguridad
             finish();
             return;
         }
 
-        // Referencia al documento del usuario
         docRefUsuario = db.collection("Usuarios").document(usuarioActual.getUid());
 
-        // Enlazar Vistas
         imagenPerfil = findViewById(R.id.imagenPerfil);
         campoNombrePerfil = findViewById(R.id.campoNombrePerfil);
         campoCorreoPerfil = findViewById(R.id.campoCorreoPerfil);
@@ -94,13 +86,10 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
         botonElegirFecha = findViewById(R.id.botonElegirFecha);
         barraProgresoPerfil = findViewById(R.id.barraProgresoPerfil);
 
-        // El correo no se puede editar (es el identificador)
         campoCorreoPerfil.setEnabled(false);
 
-        // Cargar datos del usuario
         cargarDatosUsuario();
 
-        // Configurar DatePickerDialog
         DatePickerDialog.OnDateSetListener dateSetListener = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -121,7 +110,6 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
             }
         });
 
-        // Configurar clic en imagen de perfil
         imagenPerfil.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -129,7 +117,6 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
             }
         });
 
-        // Configurar clic en guardar
         botonGuardarCambios.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -151,24 +138,21 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 barraProgresoPerfil.setVisibility(View.GONE);
                 if (documentSnapshot.exists()) {
-                    // Cargar datos en los campos (nombres en español)
                     campoNombrePerfil.setText(documentSnapshot.getString("nombreCompleto"));
                     campoCorreoPerfil.setText(documentSnapshot.getString("correo"));
                     campoCarreraPerfil.setText(documentSnapshot.getString("carrera"));
 
-                    // Cargar fecha de nacimiento (Timestamp de Firestore)
                     if (documentSnapshot.getTimestamp("fechaNacimiento") != null) {
                         calendario.setTime(documentSnapshot.getTimestamp("fechaNacimiento").toDate());
                         actualizarCampoFecha();
                     }
 
-                    // Cargar foto de perfil
                     urlFotoPerfilActual = documentSnapshot.getString("urlFotoPerfil");
                     if (urlFotoPerfilActual != null && !urlFotoPerfilActual.isEmpty()) {
                         Glide.with(ActividadPerfilUsuario.this)
                                 .load(urlFotoPerfilActual)
-                                .placeholder(R.drawable.ic_profile_placeholder);
-                                //.into(imagenPerfil);
+                                .placeholder(R.drawable.ic_profile_placeholder)
+                                .into(imagenPerfil);
                     }
                 } else {
                     Toast.makeText(ActividadPerfilUsuario.this, "No se encontraron datos de perfil.", Toast.LENGTH_SHORT).show();
@@ -193,7 +177,6 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CODIGO_SELECCION_IMAGEN && resultCode == RESULT_OK && data != null && data.getData() != null) {
             uriImagenSeleccionada = data.getData();
-            // Mostrar la imagen seleccionada en el ImageView
             Glide.with(this).load(uriImagenSeleccionada).into(imagenPerfil);
         }
     }
@@ -217,18 +200,14 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
         barraProgresoPerfil.setVisibility(View.VISIBLE);
         botonGuardarCambios.setEnabled(false);
 
-        // Comprobar si se seleccionó una nueva imagen
         if (uriImagenSeleccionada != null) {
-            // 1. Subir la nueva imagen
             subirNuevaImagenYActualizarPerfil(nombre, carrera);
         } else {
-            // 2. Solo actualizar los datos de texto
             actualizarDatosTextoPerfil(nombre, carrera, urlFotoPerfilActual);
         }
     }
 
     private void subirNuevaImagenYActualizarPerfil(String nombre, String carrera) {
-        // Ruta en Storage: fotos_perfil/{uid}.jpg
         StorageReference refFotoPerfil = storage.getReference()
                 .child("fotos_perfil")
                 .child(usuarioActual.getUid() + ".jpg");
@@ -237,12 +216,10 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Imagen subida, obtener URL de descarga
                         refFotoPerfil.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
                                 String nuevaUrlImagen = uri.toString();
-                                // Actualizar perfil con la nueva URL
                                 actualizarDatosTextoPerfil(nombre, carrera, nuevaUrlImagen);
                             }
                         });
@@ -259,21 +236,20 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
     }
 
     private void actualizarDatosTextoPerfil(String nombre, String carrera, String urlImagen) {
-        // Campos en español
         Map<String, Object> datos = new HashMap<>();
         datos.put("nombreCompleto", nombre);
         datos.put("carrera", carrera);
         datos.put("urlFotoPerfil", urlImagen);
-        datos.put("fechaNacimiento", calendario.getTime()); // Guardar como Timestamp
+        datos.put("fechaNacimiento", calendario.getTime());
 
-        docRefUsuario.set(datos, SetOptions.merge()) // SetOptions.merge() actualiza solo estos campos
+        docRefUsuario.set(datos, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         barraProgresoPerfil.setVisibility(View.GONE);
                         botonGuardarCambios.setEnabled(true);
                         Toast.makeText(ActividadPerfilUsuario.this, "Perfil actualizado.", Toast.LENGTH_SHORT).show();
-                        finish(); // Volver a la actividad principal
+                        finish();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

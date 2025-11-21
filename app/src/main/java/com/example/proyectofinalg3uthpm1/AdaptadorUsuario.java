@@ -12,14 +12,12 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-// Adaptador para la lista de usuarios (búsqueda y grupos)
 public class AdaptadorUsuario extends RecyclerView.Adapter<AdaptadorUsuario.UsuarioViewHolder> {
 
     private final Context contexto;
     private final List<ModeloUsuario> listaUsuarios;
     private final OnUsuarioClickListener listener;
 
-    // Interfaz para manejar clics en el botón "Agregar"
     public interface OnUsuarioClickListener {
         void onUsuarioClick(ModeloUsuario usuario, Button boton);
     }
@@ -44,17 +42,15 @@ public class AdaptadorUsuario extends RecyclerView.Adapter<AdaptadorUsuario.Usua
         holder.textoNombre.setText(usuario.getNombreCompleto());
         holder.textoCorreo.setText(usuario.getCorreo());
 
-        // Cargar imagen de perfil con Glide
         if (usuario.getUrlFotoPerfil() != null && !usuario.getUrlFotoPerfil().isEmpty()) {
             Glide.with(contexto)
                     .load(usuario.getUrlFotoPerfil())
-                    .placeholder(R.drawable.ic_profile_placeholder)
+                    .placeholder(R.drawable.outline_account_circle_24)
                     .into(holder.imagenPerfil);
         } else {
-            holder.imagenPerfil.setImageResource(R.drawable.ic_profile_placeholder);
+            holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
         }
 
-        // Configurar el clic del botón
         holder.botonAgregar.setOnClickListener(v -> listener.onUsuarioClick(usuario, holder.botonAgregar));
     }
 
@@ -63,7 +59,6 @@ public class AdaptadorUsuario extends RecyclerView.Adapter<AdaptadorUsuario.Usua
         return listaUsuarios.size();
     }
 
-    // ViewHolder
     static class UsuarioViewHolder extends RecyclerView.ViewHolder {
         CircleImageView imagenPerfil;
         TextView textoNombre, textoCorreo;

@@ -18,7 +18,6 @@ public class AdaptadorGrupos extends RecyclerView.Adapter<AdaptadorGrupos.GrupoV
     private final List<ModeloGrupo> listaGrupos;
     private final OnGrupoClickListener listener;
 
-    // Interfaz para detectar clics en el grupo
     public interface OnGrupoClickListener {
         void onGrupoClick(ModeloGrupo grupo);
     }
@@ -42,7 +41,6 @@ public class AdaptadorGrupos extends RecyclerView.Adapter<AdaptadorGrupos.GrupoV
 
         holder.textoNombre.setText(grupo.getNombreGrupo());
 
-        // Formatear fecha si existe
         if (grupo.getFechaCreacion() != null) {
             SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault());
             holder.textoInfo.setText("Creado el: " + sdf.format(grupo.getFechaCreacion()));
@@ -50,10 +48,8 @@ public class AdaptadorGrupos extends RecyclerView.Adapter<AdaptadorGrupos.GrupoV
             holder.textoInfo.setText("Cargando...");
         }
 
-        // Por ahora usamos imagen por defecto, podrías agregar un campo urlImagenGrupo al modelo
-        holder.imagenGrupo.setImageResource(R.drawable.ic_profile_placeholder);
+        holder.imagenGrupo.setImageResource(R.drawable.rounded_contacts_product_24);
 
-        // Configurar clic
         holder.itemView.setOnClickListener(v -> listener.onGrupoClick(grupo));
     }
 

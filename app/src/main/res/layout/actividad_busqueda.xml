@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/imagen_fondo"
     tools:context=".ActividadBusqueda">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -16,10 +17,9 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_marginTop="35dp"
-            android:background="@android:color/holo_blue_dark"
+            android:background="@color/COLORUTH"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
-        <!-- SearchView irá aquí, debajo del Toolbar -->
         <androidx.appcompat.widget.SearchView
             android:id="@+id/searchViewUsuarios"
             android:layout_width="match_parent"

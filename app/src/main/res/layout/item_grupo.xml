@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    app:cardElevation="15dp">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -14,7 +14,6 @@
         android:padding="16dp"
         android:gravity="center_vertical">
 
-        <!-- Ícono del grupo -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/imagenGrupoItem"
             android:layout_width="60dp"
@@ -43,19 +42,16 @@
                 android:id="@+id/textoInfoGrupoItem"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Creado por..."
                 android:textSize="14sp"
                 android:textColor="@android:color/darker_gray"
                 android:layout_marginTop="4dp"/>
         </LinearLayout>
 
-        <!-- Flechita indicadora -->
         <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_media_play"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:rotation="0"
-            app:tint="@android:color/darker_gray"/>
+            android:src="@drawable/rounded_call_made_24" />
 
     </LinearLayout>
 

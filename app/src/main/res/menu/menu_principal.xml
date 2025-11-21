@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-    <!-- Este archivo debe ir en la carpeta app/src/main/res/menu/ -->
-    <!-- Si la carpeta 'menu' no existe, créala. -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
@@ -27,8 +25,3 @@
         app:showAsAction="never" />
 
 </menu>
-    <!--
-    NOTA: Necesitarás agregar los íconos 'ic_add' (para el FAB) e 'ic_search' (para el menú).
-    Haz clic derecho en 'res/drawable' -> New -> Vector Asset.
-    Busca "add" y "search" en el Clip Art.
-    -->

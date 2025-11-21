@@ -18,6 +18,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import com.google.firebase.firestore.FieldPath;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,8 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
     private RecyclerView listaArchivosRecyclerView;
     private FloatingActionButton botonSubirArchivo;
     private TextView textoSinArchivos;
+    private TextView textoNombresMiembros;
+
 
     private AdaptadorArchivos adaptadorArchivos;
     private List<ModeloArchivo> listaArchivos;
@@ -41,7 +44,6 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividad_detalle_grupo);
 
-        // Obtener datos del Intent
         idGrupoActual = getIntent().getStringExtra("idGrupo");
         nombreGrupoActual = getIntent().getStringExtra("nombreGrupo");
 
@@ -51,33 +53,29 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
             return;
         }
 
-        // Configurar Firebase
         db = FirebaseFirestore.getInstance();
 
-        // Vistas
+
         toolbar = findViewById(R.id.toolbarDetalleGrupo);
         listaArchivosRecyclerView = findViewById(R.id.listaArchivosGrupo);
         botonSubirArchivo = findViewById(R.id.botonSubirArchivoGrupo);
         textoSinArchivos = findViewById(R.id.textoSinArchivos);
+        textoNombresMiembros = findViewById(R.id.textoNombresMiembros);
 
-        // Configurar Toolbar
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(nombreGrupoActual);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Configurar Recycler y Adaptador (reusamos AdaptadorArchivos)
         listaArchivos = new ArrayList<>();
         adaptadorArchivos = new AdaptadorArchivos(this, listaArchivos);
         listaArchivosRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         listaArchivosRecyclerView.setAdapter(adaptadorArchivos);
 
-        // Cargar Archivos del Grupo
         cargarArchivosDelGrupo();
+        cargarNombresDeMiembros();
 
-        // Botón para subir archivo a ESTE grupo
         botonSubirArchivo.setOnClickListener(v -> {
             Intent intent = new Intent(ActividadDetalleGrupo.this, ActividadEnviarArchivo.class);
-            // IMPORTANTE: Pasamos el ID del grupo para que se guarde correctamente
             intent.putExtra("idGrupoDestino", idGrupoActual);
             startActivity(intent);
         });
@@ -85,7 +83,7 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
 
     private void cargarArchivosDelGrupo() {
         db.collection("Archivos")
-                .whereEqualTo("idGrupoDestino", idGrupoActual) // FILTRO CLAVE
+                .whereEqualTo("idGrupoDestino", idGrupoActual)
                 .orderBy("fechaEnvio", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) {
@@ -105,7 +103,6 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
 
                         adaptadorArchivos.notifyDataSetChanged();
 
-                        // Mostrar/Ocultar mensaje de vacío
                         if (listaArchivos.isEmpty()) {
                             textoSinArchivos.setVisibility(View.VISIBLE);
                         } else {
@@ -114,6 +111,53 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
                     }
                 });
     }
+
+    private void cargarNombresDeMiembros() {
+        db.collection("Grupos").document(idGrupoActual).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        List<String> miembrosIds = (List<String>) documentSnapshot.get("miembros");
+
+                        if (miembrosIds != null && !miembrosIds.isEmpty()) {
+                            buscarYMostrarNombres(miembrosIds);
+                        } else {
+                            textoNombresMiembros.setText("Este grupo no tiene miembros.");
+                        }
+                    } else {
+                        textoNombresMiembros.setText("Información del grupo no encontrada.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DetalleGrupo", "Error al cargar la info del grupo", e);
+                    textoNombresMiembros.setText("Error al cargar miembros.");
+                });
+    }
+
+    private void buscarYMostrarNombres(List<String> ids) {
+        db.collection("Usuarios").whereIn(FieldPath.documentId(), ids).get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<String> listaDeNombres = new ArrayList<>();
+                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                        String nombre = doc.getString("nombreCompleto");
+                        if (nombre != null && !nombre.isEmpty()) {
+                            listaDeNombres.add(nombre);
+                        }
+                    }
+
+                    if (!listaDeNombres.isEmpty()) {
+                        String nombresFormateados = String.join(", ", listaDeNombres);
+                        textoNombresMiembros.setText("Miembros: " + nombresFormateados);
+                    } else {
+                        textoNombresMiembros.setText("No se encontraron los nombres de los miembros.");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DetalleGrupo", "Error al buscar los nombres de los usuarios", e);
+                    textoNombresMiembros.setText("Error al cargar nombres.");
+                });
+    }
+
+
 
     @Override
     public boolean onSupportNavigateUp() {

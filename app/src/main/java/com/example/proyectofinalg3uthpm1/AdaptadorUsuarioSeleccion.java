@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 
-// Adaptador para seleccionar usuarios (para crear grupos)
+
 public class AdaptadorUsuarioSeleccion extends RecyclerView.Adapter<AdaptadorUsuarioSeleccion.SeleccionViewHolder> {
 
     private final Context contexto;
@@ -40,13 +40,12 @@ public class AdaptadorUsuarioSeleccion extends RecyclerView.Adapter<AdaptadorUsu
         holder.textoCorreo.setText(usuario.getCorreo());
 
         if (usuario.getUrlFotoPerfil() != null && !usuario.getUrlFotoPerfil().isEmpty()) {
-            Glide.with(contexto).load(usuario.getUrlFotoPerfil()).placeholder(R.drawable.ic_profile_placeholder).into(holder.imagenPerfil);
+            Glide.with(contexto).load(usuario.getUrlFotoPerfil()).placeholder(R.drawable.outline_account_circle_24).into(holder.imagenPerfil);
         } else {
-            holder.imagenPerfil.setImageResource(R.drawable.ic_profile_placeholder);
+            holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
         }
 
-        // Manejar el estado del CheckBox
-        holder.checkBox.setOnCheckedChangeListener(null); // Evitar disparos de listener al reciclar
+        holder.checkBox.setOnCheckedChangeListener(null);
         holder.checkBox.setChecked(miembrosSeleccionados.contains(usuario.getUid()));
 
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
@@ -59,7 +58,6 @@ public class AdaptadorUsuarioSeleccion extends RecyclerView.Adapter<AdaptadorUsu
             }
         });
 
-        // Permitir seleccionar/deseleccionar al hacer clic en cualquier parte del item
         holder.itemView.setOnClickListener(v -> holder.checkBox.setChecked(!holder.checkBox.isChecked()));
     }
 
@@ -68,12 +66,10 @@ public class AdaptadorUsuarioSeleccion extends RecyclerView.Adapter<AdaptadorUsu
         return listaCompaneros.size();
     }
 
-    // Método para obtener la lista de UIDs seleccionados
     public List<String> getMiembrosSeleccionados() {
         return miembrosSeleccionados;
     }
 
-    // ViewHolder
     static class SeleccionViewHolder extends RecyclerView.ViewHolder {
         CircleImageView imagenPerfil;
         TextView textoNombre, textoCorreo;

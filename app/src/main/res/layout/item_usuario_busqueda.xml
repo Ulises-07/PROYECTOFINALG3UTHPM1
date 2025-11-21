@@ -10,13 +10,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:backgroundTint="@color/white"
         android:padding="12dp">
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/imagenPerfilUsuario"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/rounded_account_circle_24"
+            android:src="@drawable/outline_account_circle_24"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,12 +26,12 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
+            android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/black"
+            app:layout_constraintEnd_toStartOf="@id/botonAgregarCompanero"
             app:layout_constraintStart_toEndOf="@id/imagenPerfilUsuario"
             app:layout_constraintTop_toTopOf="@id/imagenPerfilUsuario"
-            app:layout_constraintEnd_toStartOf="@id/botonAgregarCompanero"
             tools:text="Nombre Completo del Usuario" />
 
         <TextView
@@ -39,9 +40,9 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@id/botonAgregarCompanero"
             app:layout_constraintStart_toEndOf="@id/imagenPerfilUsuario"
             app:layout_constraintTop_toBottomOf="@id/textoNombreUsuario"
-            app:layout_constraintEnd_toStartOf="@id/botonAgregarCompanero"
             tools:text="correo@uth.hn" />
 
         <Button
@@ -49,7 +50,7 @@
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="@android:color/holo_blue_dark"
+            android:backgroundTint="@color/VERDEUTH"
             android:text="Agregar"
             android:textColor="@color/white"
             android:textColorLink="@color/white"

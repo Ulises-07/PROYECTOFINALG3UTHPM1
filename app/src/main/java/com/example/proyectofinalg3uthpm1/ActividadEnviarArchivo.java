@@ -35,24 +35,20 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
 
     private static final String TAG = "ActividadEnviarArchivo";
 
-    // Vistas
     private Toolbar toolbar;
     private Button botonSeleccionar, botonEnviar;
     private ImageView imagenVistaPrevia;
     private TextView textoInfoArchivo;
     private ProgressBar barraProgreso;
 
-    // Firebase
     private FirebaseStorage storage;
     private FirebaseFirestore db;
     private FirebaseUser usuarioActual;
 
-    // Variables
     private Uri uriArchivoSeleccionado;
     private String tipoArchivo;
     private String nombreArchivo;
 
-    // NUEVO: Variable para saber a qué grupo va (puede ser null si es global)
     private String idGrupoDestino;
 
     private ActivityResultLauncher<String[]> lanzadorPermisos;
@@ -63,17 +59,14 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividad_enviar_archivo);
 
-        // Recibir ID del grupo si viene del Intent
         if (getIntent().hasExtra("idGrupoDestino")) {
             idGrupoDestino = getIntent().getStringExtra("idGrupoDestino");
         }
 
-        // Inicializar Firebase
         storage = FirebaseStorage.getInstance();
         db = FirebaseFirestore.getInstance();
         usuarioActual = FirebaseAuth.getInstance().getCurrentUser();
 
-        // Configurar Toolbar
         toolbar = findViewById(R.id.toolbarEnviarArchivo);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
@@ -81,7 +74,6 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        // Enlazar Vistas
         botonSeleccionar = findViewById(R.id.botonSeleccionarArchivo);
         botonEnviar = findViewById(R.id.botonEnviarArchivo);
         imagenVistaPrevia = findViewById(R.id.imagenVistaPrevia);
@@ -212,7 +204,6 @@ public class ActividadEnviarArchivo extends AppCompatActivity {
         datosArchivo.put("nombreArchivo", nombreArchivo);
         datosArchivo.put("tipoArchivo", tipoArchivo);
 
-        // AQUI ESTA EL CAMBIO IMPORTANTE: Usamos la variable idGrupoDestino
         datosArchivo.put("idGrupoDestino", idGrupoDestino);
 
         datosArchivo.put("idUsuarioDestino", null);

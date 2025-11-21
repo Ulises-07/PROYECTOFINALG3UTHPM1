@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/imagen_fondo"
     tools:context=".ActividadCrearGrupo">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -17,7 +18,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_marginTop="35dp"
-            android:background="@android:color/holo_blue_dark"
+            android:background="@color/COLORUTH"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -52,16 +53,13 @@
                 android:layout_marginTop="16dp"
                 android:textStyle="bold"/>
 
-            <!-- Aquí irá la lista de compañeros. Usaremos un RecyclerView -->
-            <!-- Nota: Para grupos grandes, un RecyclerView es mejor. -->
-            <!-- Para esta implementación, cargaremos los compañeros -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/listaCompanerosParaGrupo"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_marginTop="8dp"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_usuario_seleccion" /> <!-- Necesitarás crear este layout -->
+                tools:listitem="@layout/item_usuario_seleccion" />
 
             <ProgressBar
                 android:id="@+id/barraProgresoGrupo"
@@ -75,7 +73,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp"
                 android:layout_marginTop="24dp"
-                android:backgroundTint="@android:color/holo_blue_dark"
+                android:backgroundTint="@color/COLORUTH"
                 android:text="Crear Grupo"
                 android:textSize="18sp" />
 

@@ -4,7 +4,6 @@ import com.google.firebase.firestore.ServerTimestamp;
 import java.util.Date;
 import java.util.List;
 
-// Modelo de datos para un Grupo (para Firestore)
 public class ModeloGrupo {
 
     private String nombreGrupo;
@@ -22,10 +21,9 @@ public class ModeloGrupo {
         this.nombreGrupo = nombreGrupo;
         this.idCreador = idCreador;
         this.miembros = miembros;
-        // fechaCreacion se asignará por el servidor
     }
 
-    // --- Getters ---
+
     public String getNombreGrupo() {
         return nombreGrupo;
     }
@@ -46,7 +44,7 @@ public class ModeloGrupo {
         return documentId;
     }
 
-    // --- Setters ---
+
     public void setNombreGrupo(String nombreGrupo) {
         this.nombreGrupo = nombreGrupo;
     }

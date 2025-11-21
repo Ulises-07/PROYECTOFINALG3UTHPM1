@@ -27,18 +27,15 @@ import java.util.List;
 
 public class ActividadPrincipal extends AppCompatActivity {
 
-    // Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private FirebaseUser usuarioActual;
 
-    // Vistas
     private Toolbar barraHerramientas;
-    private RecyclerView listaGruposRecyclerView; // Cambiado nombre para claridad
+    private RecyclerView listaGruposRecyclerView;
     private FloatingActionButton botonFlotanteAgregar;
-    private TextView textoVacio; // Para mostrar si no hay grupos
+    private TextView textoVacio;
 
-    // Adaptador para GRUPOS
     private AdaptadorGrupos adaptadorGrupos;
     private List<ModeloGrupo> listaDeGrupos;
 
@@ -47,33 +44,24 @@ public class ActividadPrincipal extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.actividad_principal);
 
-        // Inicializar Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         usuarioActual = mAuth.getCurrentUser();
 
-        // Configurar Toolbar
         barraHerramientas = findViewById(R.id.toolbarPrincipal);
         setSupportActionBar(barraHerramientas);
-        getSupportActionBar().setTitle("Mis Grupos"); // Cambiado título
+        getSupportActionBar().setTitle("Mis Grupos");
 
-        // Enlazar Vistas
-        listaGruposRecyclerView = findViewById(R.id.listaFeedArchivos); // Reusamos el ID del XML existente o cámbialo
+        listaGruposRecyclerView = findViewById(R.id.listaFeedArchivos);
         botonFlotanteAgregar = findViewById(R.id.botonFlotanteAgregar);
-
-        // Es recomendable agregar un TextView en tu XML (actividad_principal.xml) con id emptyView
-        // Si no lo tienes, puedes ignorar esta línea, pero ayuda a la UX
-        // textoVacio = findViewById(R.id.emptyView);
 
         if (usuarioActual == null) {
             irAInicioSesion();
             return;
         }
 
-        // Configurar RecyclerView para GRUPOS
         listaDeGrupos = new ArrayList<>();
         adaptadorGrupos = new AdaptadorGrupos(this, listaDeGrupos, grupo -> {
-            // AL HACER CLIC EN UN GRUPO:
             Intent intent = new Intent(ActividadPrincipal.this, ActividadDetalleGrupo.class);
             intent.putExtra("idGrupo", grupo.getDocumentId());
             intent.putExtra("nombreGrupo", grupo.getNombreGrupo());
@@ -83,10 +71,8 @@ public class ActividadPrincipal extends AppCompatActivity {
         listaGruposRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         listaGruposRecyclerView.setAdapter(adaptadorGrupos);
 
-        // Cargar los grupos
         cargarMisGrupos();
 
-        // Configurar botón flotante (Crear nuevo grupo)
         botonFlotanteAgregar.setOnClickListener(v -> {
             Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
             startActivity(intent);
@@ -94,7 +80,6 @@ public class ActividadPrincipal extends AppCompatActivity {
     }
 
     private void cargarMisGrupos() {
-        // Consulta: Traer grupos donde el array "miembros" contiene mi UID
         db.collection("Grupos")
                 .whereArrayContains("miembros", usuarioActual.getUid())
                 .orderBy("fechaCreacion", Query.Direction.DESCENDING)
@@ -137,7 +122,6 @@ public class ActividadPrincipal extends AppCompatActivity {
             startActivity(intent);
             return true;
         } else if (id == R.id.menu_grupos) {
-            // Ya estamos en grupos, o podemos ir a crear
             Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
             startActivity(intent);
             return true;
