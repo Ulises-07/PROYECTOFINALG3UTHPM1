@@ -1,11 +1,13 @@
 package com.example.proyectofinalg3uthpm1;
 
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -151,7 +153,7 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
                     if (urlFotoPerfilActual != null && !urlFotoPerfilActual.isEmpty()) {
                         Glide.with(ActividadPerfilUsuario.this)
                                 .load(urlFotoPerfilActual)
-                                .placeholder(R.drawable.ic_profile_placeholder)
+                                .placeholder(R.drawable.rounded_account_circle_24)
                                 .into(imagenPerfil);
                     }
                 } else {
@@ -208,9 +210,18 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
     }
 
     private void subirNuevaImagenYActualizarPerfil(String nombre, String carrera) {
+        ContentResolver cR = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        String tipoArchivo = mime.getExtensionFromMimeType(cR.getType(uriImagenSeleccionada));
+
+        if (tipoArchivo == null) {
+            tipoArchivo = "jpg";
+        }
+
+        String nombreArchivo = usuarioActual.getUid() + "." + tipoArchivo;
         StorageReference refFotoPerfil = storage.getReference()
                 .child("fotos_perfil")
-                .child(usuarioActual.getUid() + ".jpg");
+                .child(nombreArchivo);
 
         refFotoPerfil.putFile(uriImagenSeleccionada)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -220,7 +231,17 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
                             @Override
                             public void onSuccess(Uri uri) {
                                 String nuevaUrlImagen = uri.toString();
+
+                                uriImagenSeleccionada = null;
+
                                 actualizarDatosTextoPerfil(nombre, carrera, nuevaUrlImagen);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                barraProgresoPerfil.setVisibility(View.GONE);
+                                botonGuardarCambios.setEnabled(true);
+                                Toast.makeText(ActividadPerfilUsuario.this, "Error al obtener URL de imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             }
                         });
                     }
@@ -234,6 +255,7 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
                     }
                 });
     }
+
 
     private void actualizarDatosTextoPerfil(String nombre, String carrera, String urlImagen) {
         Map<String, Object> datos = new HashMap<>();
