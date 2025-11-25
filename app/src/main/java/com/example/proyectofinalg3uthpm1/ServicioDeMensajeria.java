@@ -62,7 +62,7 @@ public class ServicioDeMensajeria extends FirebaseMessagingService {
 
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, CANAL_ID)
-                        .setSmallIcon(R.drawable.ic_profile_placeholder) // TODO: Reemplazar con el ícono de la app
+                        .setSmallIcon(R.drawable.ic_profile_placeholder)
                         .setContentTitle(titulo)
                         .setContentText(cuerpo)
                         .setAutoCancel(true)
