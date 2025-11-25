@@ -246,6 +246,7 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
                     })
                     .addOnFailureListener(e -> {
                         // Mostrar errores en el hilo principal
+                        // Mostrar errores en el hilo principal
                         runOnUiThread(() -> {
                             barraProgresoPerfil.setVisibility(View.GONE);
                             botonGuardarCambios.setEnabled(true);
