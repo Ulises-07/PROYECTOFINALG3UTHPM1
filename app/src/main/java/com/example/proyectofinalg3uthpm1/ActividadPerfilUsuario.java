@@ -210,51 +210,51 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
     }
 
     private void subirNuevaImagenYActualizarPerfil(String nombre, String carrera) {
-        ContentResolver cR = getContentResolver();
-        MimeTypeMap mime = MimeTypeMap.getSingleton();
-        String tipoArchivo = mime.getExtensionFromMimeType(cR.getType(uriImagenSeleccionada));
+        // Usamos un nuevo hilo para la parte que puede causar el bloqueo
+        new Thread(() -> {
+            ContentResolver cR = getContentResolver();
+            MimeTypeMap mime = MimeTypeMap.getSingleton();
+            String tipoArchivo = mime.getExtensionFromMimeType(cR.getType(uriImagenSeleccionada));
 
-        if (tipoArchivo == null) {
-            tipoArchivo = "jpg";
-        }
+            if (tipoArchivo == null) {
+                tipoArchivo = "jpg"; // Un valor por defecto seguro
+            }
 
-        String nombreArchivo = usuarioActual.getUid() + "." + tipoArchivo;
-        StorageReference refFotoPerfil = storage.getReference()
-                .child("fotos_perfil")
-                .child(nombreArchivo);
+            // El nombre del archivo y la referencia a Storage
+            String nombreArchivo = usuarioActual.getUid() + "_" + System.currentTimeMillis() + "." + tipoArchivo;
+            StorageReference refFotoPerfil = storage.getReference()
+                    .child("fotos_perfil")
+                    .child(usuarioActual.getUid()) // Usar el UID del usuario como carpeta es más organizado
+                    .child(nombreArchivo);
 
-        refFotoPerfil.putFile(uriImagenSeleccionada)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        refFotoPerfil.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                                String nuevaUrlImagen = uri.toString();
-
-                                uriImagenSeleccionada = null;
-
-                                actualizarDatosTextoPerfil(nombre, carrera, nuevaUrlImagen);
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
+            // El resto del código de subida de Firebase ya es asíncrono y seguro
+            refFotoPerfil.putFile(uriImagenSeleccionada)
+                    .addOnSuccessListener(taskSnapshot -> {
+                        refFotoPerfil.getDownloadUrl().addOnSuccessListener(uri -> {
+                            String nuevaUrlImagen = uri.toString();
+                            uriImagenSeleccionada = null; // Limpiar la URI
+                            // Los datos de texto se actualizan en el hilo principal
+                            runOnUiThread(() -> actualizarDatosTextoPerfil(nombre, carrera, nuevaUrlImagen));
+                        }).addOnFailureListener(e -> {
+                            // Mostrar errores en el hilo principal
+                            runOnUiThread(() -> {
                                 barraProgresoPerfil.setVisibility(View.GONE);
                                 botonGuardarCambios.setEnabled(true);
-                                Toast.makeText(ActividadPerfilUsuario.this, "Error al obtener URL de imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
+                                Toast.makeText(ActividadPerfilUsuario.this, "Error al obtener URL: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
                         });
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        barraProgresoPerfil.setVisibility(View.GONE);
-                        botonGuardarCambios.setEnabled(true);
-                        Toast.makeText(ActividadPerfilUsuario.this, "Error al subir imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                    })
+                    .addOnFailureListener(e -> {
+                        // Mostrar errores en el hilo principal
+                        runOnUiThread(() -> {
+                            barraProgresoPerfil.setVisibility(View.GONE);
+                            botonGuardarCambios.setEnabled(true);
+                            Toast.makeText(ActividadPerfilUsuario.this, "Error al subir imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        });
+                    });
+        }).start(); // Iniciar el hilo
     }
+
 
 
     private void actualizarDatosTextoPerfil(String nombre, String carrera, String urlImagen) {
