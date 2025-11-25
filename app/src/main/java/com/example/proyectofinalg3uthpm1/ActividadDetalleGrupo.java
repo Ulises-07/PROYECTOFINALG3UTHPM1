@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -39,6 +40,9 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
     private String idGrupoActual;
     private String nombreGrupoActual;
 
+    private FloatingActionButton botonAnadirMiembros;
+    private String idCreadorGrupo;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,6 +66,8 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
         textoSinArchivos = findViewById(R.id.textoSinArchivos);
         textoNombresMiembros = findViewById(R.id.textoNombresMiembros);
 
+        botonAnadirMiembros = findViewById(R.id.botonAnadirMiembros);
+
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(nombreGrupoActual);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -79,6 +85,15 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
             intent.putExtra("idGrupoDestino", idGrupoActual);
             startActivity(intent);
         });
+
+        // 3. Configura el OnClickListener para el nuevo botón
+        botonAnadirMiembros.setOnClickListener(v -> {
+            Intent intent = new Intent(ActividadDetalleGrupo.this, ActividadAnadirMiembros.class);
+            // Pasa el ID del grupo a la nueva actividad
+            intent.putExtra("id_grupo", idGrupoActual);
+            startActivity(intent);
+        });
+
     }
 
     private void cargarArchivosDelGrupo() {
@@ -116,6 +131,20 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
         db.collection("Grupos").document(idGrupoActual).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
+
+                        // --- INICIO DEL CÓDIGO AÑADIDO (LÓGICA DE VISIBILIDAD) ---
+                        // 4. Obtén el ID del creador desde el documento del grupo
+                        idCreadorGrupo = documentSnapshot.getString("idCreador");
+                        String uidUsuarioActual = FirebaseAuth.getInstance().getUid();
+
+                        // 5. Compara el creador con el usuario actual y ajusta la visibilidad
+                        if (idCreadorGrupo != null && idCreadorGrupo.equals(uidUsuarioActual)) {
+                            botonAnadirMiembros.setVisibility(View.VISIBLE);
+                        } else {
+                            botonAnadirMiembros.setVisibility(View.GONE);
+                        }
+                        // --- FIN DEL CÓDIGO AÑADIDO ---
+
                         List<String> miembrosIds = (List<String>) documentSnapshot.get("miembros");
 
                         if (miembrosIds != null && !miembrosIds.isEmpty()) {

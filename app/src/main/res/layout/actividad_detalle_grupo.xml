@@ -71,6 +71,16 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/botonAnadirMiembros"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="16dp"
+        android:contentDescription="AnadirMiembros"
+        android:src="@drawable/ic_add"
+        app:backgroundTint="@color/VERDEUTH" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/botonSubirArchivoGrupo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

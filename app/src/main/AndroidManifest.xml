@@ -62,6 +62,11 @@
             android:exported="false"
             android:label="Detalle Grupo"/>
 
+        <activity
+            android:name=".ActividadAnadirMiembros"
+            android:exported="false"
+            android:label="Anadir Miembros"/>
+
         <service
             android:name=".ServicioDeMensajeria"
             android:exported="false">
