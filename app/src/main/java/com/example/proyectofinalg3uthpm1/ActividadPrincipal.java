@@ -20,6 +20,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
@@ -38,6 +39,8 @@ public class ActividadPrincipal extends AppCompatActivity {
 
     private AdaptadorGrupos adaptadorGrupos;
     private List<ModeloGrupo> listaDeGrupos;
+
+    private ListenerRegistration oyenteDeGrupos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +74,7 @@ public class ActividadPrincipal extends AppCompatActivity {
         listaGruposRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         listaGruposRecyclerView.setAdapter(adaptadorGrupos);
 
-        cargarMisGrupos();
+        //cargarMisGrupos();
 
         botonFlotanteAgregar.setOnClickListener(v -> {
             Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
@@ -79,8 +82,27 @@ public class ActividadPrincipal extends AppCompatActivity {
         });
     }
 
+    // 2. Mover la lógica de carga de datos a onStart()
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Empezamos a escuchar cambios cuando la pantalla se vuelve visible
+        cargarMisGrupos();
+    }
+
+    // 3. Añadir onStop() para detener la escucha cuando la pantalla ya no es visible
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Si el "oyente" existe, lo detenemos para ahorrar recursos
+        if (oyenteDeGrupos != null) {
+            oyenteDeGrupos.remove();
+        }
+    }
+
+
     private void cargarMisGrupos() {
-        db.collection("Grupos")
+        oyenteDeGrupos = db.collection("Grupos")
                 .whereArrayContains("miembros", usuarioActual.getUid())
                 .orderBy("fechaCreacion", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, e) -> {
