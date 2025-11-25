@@ -1,11 +1,11 @@
 package com.example.proyectofinalg3uthpm1;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -14,7 +14,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView;;
+import android.view.LayoutInflater;
+import android.view.View;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
@@ -102,6 +104,41 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
                 }
             }
         });
+
+
+        holder.botonDescargar.setOnClickListener(v -> {
+            descargarArchivo(archivo);
+        });
+
+
+    }
+
+    private void descargarArchivo(ModeloArchivo archivo) {
+        String urlDeDescarga = archivo.getUrlArchivo();
+        String nombreArchivo = archivo.getNombreArchivo();
+
+        if (urlDeDescarga == null || urlDeDescarga.isEmpty()) {
+            Toast.makeText(contexto, "URL de descarga no válida.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            DownloadManager downloadManager = (DownloadManager) contexto.getSystemService(Context.DOWNLOAD_SERVICE);
+            Uri uri = Uri.parse(urlDeDescarga);
+
+            DownloadManager.Request request = new DownloadManager.Request(uri);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, nombreArchivo);
+            request.setTitle(nombreArchivo);
+            request.setDescription("Descargando...");
+
+            downloadManager.enqueue(request);
+            Toast.makeText(contexto, "Archivo Descargado", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Toast.makeText(contexto, "Error al iniciar la descarga.", Toast.LENGTH_SHORT).show();
+            Log.e("AdaptadorArchivos", "Error al descargar: " + e.getMessage());
+        }
     }
 
     private void mostrarDialogoDeBorrado(ModeloArchivo archivo, int position) {
@@ -143,7 +180,7 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
     static class ArchivoViewHolder extends RecyclerView.ViewHolder {
         CircleImageView imagenPerfil;
         TextView textoNombreEmisor, textoFecha, textoNombreArchivo;
-        ImageView imagenContenido, botonEliminar, iconoTipoArchivo;
+        ImageView imagenContenido, botonEliminar, iconoTipoArchivo, botonDescargar;
         LinearLayout layoutArchivoGenerico;
 
         public ArchivoViewHolder(@NonNull View itemView) {
@@ -156,6 +193,9 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
             botonEliminar = itemView.findViewById(R.id.botonEliminarArchivo);
             iconoTipoArchivo = itemView.findViewById(R.id.iconoTipoArchivo);
             layoutArchivoGenerico = itemView.findViewById(R.id.layoutArchivoGenerico);
+
+            botonDescargar = itemView.findViewById(R.id.botonDescargarArchivo);
+
         }
     }
 }

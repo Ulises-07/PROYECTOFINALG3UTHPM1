@@ -48,6 +48,15 @@
             </LinearLayout>
 
             <ImageView
+                android:id="@+id/botonDescargarArchivo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:contentDescription="Descargar archivo"
+                android:padding="8dp"
+                android:src="@drawable/rounded_arrow_cool_down_24" />
+
+            <ImageView
                 android:id="@+id/botonEliminarArchivo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,6 +106,7 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="NombreDelArchivo.pdf" />
+
 
         </LinearLayout>
 
