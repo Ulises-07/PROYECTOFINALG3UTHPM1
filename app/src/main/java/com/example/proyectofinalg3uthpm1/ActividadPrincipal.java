@@ -5,10 +5,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -30,17 +26,16 @@ public class ActividadPrincipal extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-    private FirebaseUser usuarioActual;
 
     private Toolbar barraHerramientas;
     private RecyclerView listaGruposRecyclerView;
     private FloatingActionButton botonFlotanteAgregar;
-    private TextView textoVacio;
 
     private AdaptadorGrupos adaptadorGrupos;
     private List<ModeloGrupo> listaDeGrupos;
 
     private ListenerRegistration oyenteDeGrupos;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,8 +43,13 @@ public class ActividadPrincipal extends AppCompatActivity {
         setContentView(R.layout.actividad_principal);
 
         mAuth = FirebaseAuth.getInstance();
+
+        if (mAuth.getCurrentUser() == null) {
+            irAInicioSesion();
+            return;
+        }
+
         db = FirebaseFirestore.getInstance();
-        usuarioActual = mAuth.getCurrentUser();
 
         barraHerramientas = findViewById(R.id.toolbarPrincipal);
         setSupportActionBar(barraHerramientas);
@@ -57,11 +57,6 @@ public class ActividadPrincipal extends AppCompatActivity {
 
         listaGruposRecyclerView = findViewById(R.id.listaFeedArchivos);
         botonFlotanteAgregar = findViewById(R.id.botonFlotanteAgregar);
-
-        if (usuarioActual == null) {
-            irAInicioSesion();
-            return;
-        }
 
         listaDeGrupos = new ArrayList<>();
         adaptadorGrupos = new AdaptadorGrupos(this, listaDeGrupos, grupo -> {
@@ -74,43 +69,48 @@ public class ActividadPrincipal extends AppCompatActivity {
         listaGruposRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         listaGruposRecyclerView.setAdapter(adaptadorGrupos);
 
-        //cargarMisGrupos();
-
         botonFlotanteAgregar.setOnClickListener(v -> {
             Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
             startActivity(intent);
         });
+
     }
 
-    // 2. Mover la lógica de carga de datos a onStart()
+
     @Override
     protected void onStart() {
         super.onStart();
-        // Empezamos a escuchar cambios cuando la pantalla se vuelve visible
-        cargarMisGrupos();
-    }
-
-    // 3. Añadir onStop() para detener la escucha cuando la pantalla ya no es visible
-    @Override
-    protected void onStop() {
-        super.onStop();
-        // Si el "oyente" existe, lo detenemos para ahorrar recursos
-        if (oyenteDeGrupos != null) {
-            oyenteDeGrupos.remove();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            cargarMisGrupos(currentUser.getUid());
+        } else {
+            irAInicioSesion();
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (oyenteDeGrupos != null) {
+            oyenteDeGrupos.remove();
+            oyenteDeGrupos = null;
+        }
+    }
 
-    private void cargarMisGrupos() {
+    private void cargarMisGrupos(String uid) {
+        if (oyenteDeGrupos != null) {
+            oyenteDeGrupos.remove();
+        }
+
+        Log.d("CargarGrupos", "Iniciando carga de grupos para el UID: " + uid);
         oyenteDeGrupos = db.collection("Grupos")
-                .whereArrayContains("miembros", usuarioActual.getUid())
+                .whereArrayContains("miembros", uid)
                 .orderBy("fechaCreacion", Query.Direction.DESCENDING)
                 .addSnapshotListener((snapshots, e) -> {
                     if (e != null) {
                         Log.w("ActividadPrincipal", "Error al cargar grupos.", e);
                         return;
                     }
-
                     if (snapshots != null) {
                         listaDeGrupos.clear();
                         for (DocumentSnapshot doc : snapshots.getDocuments()) {
@@ -121,6 +121,7 @@ public class ActividadPrincipal extends AppCompatActivity {
                             }
                         }
                         adaptadorGrupos.notifyDataSetChanged();
+                        Log.d("CargarGrupos", "Carga completa. Se encontraron " + listaDeGrupos.size() + " grupos.");
                     }
                 });
     }
@@ -136,18 +137,18 @@ public class ActividadPrincipal extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.menu_perfil) {
-            Intent intent = new Intent(ActividadPrincipal.this, ActividadPerfilUsuario.class);
-            startActivity(intent);
+            startActivity(new Intent(ActividadPrincipal.this, ActividadPerfilUsuario.class));
             return true;
         } else if (id == R.id.menu_buscar) {
-            Intent intent = new Intent(ActividadPrincipal.this, ActividadBusqueda.class);
-            startActivity(intent);
+            startActivity(new Intent(ActividadPrincipal.this, ActividadBusqueda.class));
             return true;
         } else if (id == R.id.menu_grupos) {
-            Intent intent = new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class);
-            startActivity(intent);
+            startActivity(new Intent(ActividadPrincipal.this, ActividadCrearGrupo.class));
             return true;
         } else if (id == R.id.menu_cerrar_sesion) {
+            if (oyenteDeGrupos != null) {
+                oyenteDeGrupos.remove();
+            }
             mAuth.signOut();
             irAInicioSesion();
             return true;
@@ -156,9 +157,11 @@ public class ActividadPrincipal extends AppCompatActivity {
     }
 
     private void irAInicioSesion() {
-        Intent intent = new Intent(ActividadPrincipal.this, ActividadInicioSesion.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
+        if (!isFinishing()) {
+            Intent intent = new Intent(ActividadPrincipal.this, ActividadInicioSesion.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        }
     }
 }
