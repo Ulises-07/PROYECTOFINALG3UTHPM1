@@ -62,8 +62,35 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
         }
 
 
-        holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
+        String idEmisor = archivo.getIdUsuarioEmisor();
 
+        if (idEmisor != null && !idEmisor.isEmpty()) {
+
+            FirebaseFirestore.getInstance().collection("Usuarios").document(idEmisor).get()
+                    .addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            String urlFoto = documentSnapshot.getString("urlFotoPerfil");
+
+                            if (urlFoto != null && !urlFoto.isEmpty()) {
+                                Glide.with(contexto)
+                                        .load(urlFoto)
+                                        .placeholder(R.drawable.outline_account_circle_24)
+                                        .error(R.drawable.outline_account_circle_24)
+                                        .into(holder.imagenPerfil);
+                            } else {
+                                holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
+                            }
+                        } else {
+                            holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
+                        Log.e("AdaptadorArchivos", "Error al obtener foto de perfil", e);
+                    });
+        } else {
+            holder.imagenPerfil.setImageResource(R.drawable.outline_account_circle_24);
+        }
 
         String tipo = archivo.getTipoArchivo();
         if (tipo != null && tipo.startsWith("image/")) {

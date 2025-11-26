@@ -20,6 +20,17 @@
             android:background="@color/COLORUTH"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
 
+        <TextView
+            android:id="@+id/textoNombreUsuario"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="Cargando nombre..."
+            android:textColor="@color/COLORUTH"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView

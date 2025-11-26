@@ -12,6 +12,7 @@ public class ModeloArchivo {
     private String tipoArchivo;
     private String idGrupoDestino;
     private String idUsuarioDestino;
+    private String urlFotoPerfilEmisor;
     @ServerTimestamp
     private Date fechaEnvio;
 
@@ -56,6 +57,11 @@ public class ModeloArchivo {
         return documentId;
     }
 
+    public String getUrlFotoPerfilEmisor() {return urlFotoPerfilEmisor;}
+
+    public void setUrlFotoPerfilEmisor(String urlFotoPerfilEmisor) {
+        this.urlFotoPerfilEmisor = urlFotoPerfilEmisor;
+    }
 
     public void setIdUsuarioEmisor(String idUsuarioEmisor) {
         this.idUsuarioEmisor = idUsuarioEmisor;

@@ -3,11 +3,14 @@ package com.example.proyectofinalg3uthpm1;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,7 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
@@ -86,15 +92,68 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
             startActivity(intent);
         });
 
-        // 3. Configura el OnClickListener para el nuevo botón
         botonAnadirMiembros.setOnClickListener(v -> {
             Intent intent = new Intent(ActividadDetalleGrupo.this, ActividadAnadirMiembros.class);
-            // Pasa el ID del grupo a la nueva actividad
             intent.putExtra("id_grupo", idGrupoActual);
             startActivity(intent);
         });
 
     }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_detalle_grupo, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.menu_salir_grupo) {
+            mostrarDialogoDeConfirmacion();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+
+    private void mostrarDialogoDeConfirmacion() {
+        new AlertDialog.Builder(this)
+                .setTitle("Salir del grupo")
+                .setMessage("¿Estás seguro de que deseas abandonar este grupo? Esta acción no se puede deshacer.")
+                .setPositiveButton("Sí, salir", (dialog, which) -> {
+                    salirDelGrupo();
+                })
+                .setNegativeButton("Cancelar", null)
+                .setIcon(R.drawable.ic_logout)
+                .show();
+    }
+
+
+    private void salirDelGrupo() {
+        FirebaseUser usuarioActual = FirebaseAuth.getInstance().getCurrentUser();
+        if (usuarioActual == null) {
+            Toast.makeText(this, "No se pudo verificar el usuario.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (idCreadorGrupo != null && idCreadorGrupo.equals(usuarioActual.getUid())) {
+            Toast.makeText(this, "No puedes salir de un grupo que tú creaste.", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        DocumentReference grupoRef = db.collection("Grupos").document(idGrupoActual);
+
+        grupoRef.update("miembros", FieldValue.arrayRemove(usuarioActual.getUid()))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(ActividadDetalleGrupo.this, "Has salido del grupo.", Toast.LENGTH_SHORT).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(ActividadDetalleGrupo.this, "Error al salir del grupo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
 
     private void cargarArchivosDelGrupo() {
         db.collection("Archivos")

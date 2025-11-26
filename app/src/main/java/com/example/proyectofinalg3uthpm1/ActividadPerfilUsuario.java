@@ -102,14 +102,18 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
             }
         };
 
-        botonElegirFecha.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new DatePickerDialog(ActividadPerfilUsuario.this, dateSetListener,
-                        calendario.get(Calendar.YEAR),
-                        calendario.get(Calendar.MONTH),
-                        calendario.get(Calendar.DAY_OF_MONTH)).show();
-            }
+        botonElegirFecha.setOnClickListener(v -> {
+
+            DatePickerDialog datePickerDialog = new DatePickerDialog(ActividadPerfilUsuario.this, dateSetListener,
+                    calendario.get(Calendar.YEAR),
+                    calendario.get(Calendar.MONTH),
+                    calendario.get(Calendar.DAY_OF_MONTH));
+
+            DatePicker datePicker = datePickerDialog.getDatePicker();
+
+            datePicker.setMaxDate(System.currentTimeMillis());
+
+            datePickerDialog.show();
         });
 
         imagenPerfil.setOnClickListener(new View.OnClickListener() {
@@ -210,33 +214,29 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
     }
 
     private void subirNuevaImagenYActualizarPerfil(String nombre, String carrera) {
-        // Usamos un nuevo hilo para la parte que puede causar el bloqueo
         new Thread(() -> {
             ContentResolver cR = getContentResolver();
             MimeTypeMap mime = MimeTypeMap.getSingleton();
             String tipoArchivo = mime.getExtensionFromMimeType(cR.getType(uriImagenSeleccionada));
 
             if (tipoArchivo == null) {
-                tipoArchivo = "jpg"; // Un valor por defecto seguro
+                tipoArchivo = "jpg";
             }
 
             // El nombre del archivo y la referencia a Storage
             String nombreArchivo = usuarioActual.getUid() + "_" + System.currentTimeMillis() + "." + tipoArchivo;
             StorageReference refFotoPerfil = storage.getReference()
                     .child("fotos_perfil")
-                    .child(usuarioActual.getUid()) // Usar el UID del usuario como carpeta es más organizado
+                    .child(usuarioActual.getUid())
                     .child(nombreArchivo);
 
-            // El resto del código de subida de Firebase ya es asíncrono y seguro
             refFotoPerfil.putFile(uriImagenSeleccionada)
                     .addOnSuccessListener(taskSnapshot -> {
                         refFotoPerfil.getDownloadUrl().addOnSuccessListener(uri -> {
                             String nuevaUrlImagen = uri.toString();
-                            uriImagenSeleccionada = null; // Limpiar la URI
-                            // Los datos de texto se actualizan en el hilo principal
+                            uriImagenSeleccionada = null;
                             runOnUiThread(() -> actualizarDatosTextoPerfil(nombre, carrera, nuevaUrlImagen));
                         }).addOnFailureListener(e -> {
-                            // Mostrar errores en el hilo principal
                             runOnUiThread(() -> {
                                 barraProgresoPerfil.setVisibility(View.GONE);
                                 botonGuardarCambios.setEnabled(true);
@@ -245,17 +245,14 @@ public class ActividadPerfilUsuario extends AppCompatActivity {
                         });
                     })
                     .addOnFailureListener(e -> {
-                        // Mostrar errores en el hilo principal
-                        // Mostrar errores en el hilo principal
                         runOnUiThread(() -> {
                             barraProgresoPerfil.setVisibility(View.GONE);
                             botonGuardarCambios.setEnabled(true);
                             Toast.makeText(ActividadPerfilUsuario.this, "Error al subir imagen: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         });
                     });
-        }).start(); // Iniciar el hilo
+        }).start();
     }
-
 
 
     private void actualizarDatosTextoPerfil(String nombre, String carrera, String urlImagen) {

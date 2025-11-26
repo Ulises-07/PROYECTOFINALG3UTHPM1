@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -36,6 +38,7 @@ public class ActividadPrincipal extends AppCompatActivity {
 
     private ListenerRegistration oyenteDeGrupos;
 
+    private TextView textoNombreUsuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +60,7 @@ public class ActividadPrincipal extends AppCompatActivity {
 
         listaGruposRecyclerView = findViewById(R.id.listaFeedArchivos);
         botonFlotanteAgregar = findViewById(R.id.botonFlotanteAgregar);
+        textoNombreUsuario = findViewById(R.id.textoNombreUsuario);
 
         listaDeGrupos = new ArrayList<>();
         adaptadorGrupos = new AdaptadorGrupos(this, listaDeGrupos, grupo -> {
@@ -77,15 +81,34 @@ public class ActividadPrincipal extends AppCompatActivity {
     }
 
 
+
     @Override
     protected void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
+            cargarDatosUsuario(currentUser.getUid());
             cargarMisGrupos(currentUser.getUid());
         } else {
             irAInicioSesion();
         }
+    }
+
+    private void cargarDatosUsuario(String uid) {
+        db.collection("Usuarios").document(uid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String nombre = documentSnapshot.getString("nombreCompleto");
+                        if (nombre != null && !nombre.isEmpty()) {
+                            textoNombreUsuario.setText("Hola, " + nombre);
+                        } else {
+                            textoNombreUsuario.setText("Bienvenido/a");
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    textoNombreUsuario.setText("Bienvenido/a");
+                });
     }
 
     @Override
