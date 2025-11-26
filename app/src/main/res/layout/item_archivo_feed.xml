@@ -73,12 +73,12 @@
             android:id="@+id/imagenContenidoFeed"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="400dp"
             android:adjustViewBounds="true"
+            android:maxHeight="400dp"
             android:scaleType="centerCrop"
             android:visibility="gone"
-            tools:src="@tools:sample/backgrounds/scenic"
-            tools:visibility="visible"/>
+            tools:src="@drawable/rounded_imagesmode_24"
+            tools:visibility="visible" />
 
         <LinearLayout
             android:id="@+id/layoutArchivoGenerico"

@@ -99,7 +99,7 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
             holder.layoutArchivoGenerico.setVisibility(View.GONE);
             Glide.with(contexto)
                     .load(archivo.getUrlArchivo())
-                    .placeholder(R.drawable.outline_account_circle_24)
+                    .placeholder(R.drawable.rounded_imagesmode_24)
                     .into(holder.imagenContenido);
         } else {
             holder.imagenContenido.setVisibility(View.GONE);
@@ -189,7 +189,7 @@ public class AdaptadorArchivos extends RecyclerView.Adapter<AdaptadorArchivos.Ar
                                 Toast.makeText(contexto, "Archivo eliminado.", Toast.LENGTH_SHORT).show();
                             })
                             .addOnFailureListener(e -> {
-                                Toast.makeText(contexto, "Error al eliminar de Storage.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(contexto, "Archivo eliminado", Toast.LENGTH_SHORT).show();
                                 Log.e("AdaptadorArchivos", "Error Storage delete: " + e.getMessage());
                             });
                 })
