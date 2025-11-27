@@ -191,18 +191,14 @@ public class ActividadDetalleGrupo extends AppCompatActivity {
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
 
-                        // --- INICIO DEL CÓDIGO AÑADIDO (LÓGICA DE VISIBILIDAD) ---
-                        // 4. Obtén el ID del creador desde el documento del grupo
                         idCreadorGrupo = documentSnapshot.getString("idCreador");
                         String uidUsuarioActual = FirebaseAuth.getInstance().getUid();
 
-                        // 5. Compara el creador con el usuario actual y ajusta la visibilidad
                         if (idCreadorGrupo != null && idCreadorGrupo.equals(uidUsuarioActual)) {
                             botonAnadirMiembros.setVisibility(View.VISIBLE);
                         } else {
                             botonAnadirMiembros.setVisibility(View.GONE);
                         }
-                        // --- FIN DEL CÓDIGO AÑADIDO ---
 
                         List<String> miembrosIds = (List<String>) documentSnapshot.get("miembros");
 
